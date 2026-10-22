@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Database Viewer</title>
+<style>
+  :root { --bg:#f8fafc; --card:#fff; --line:#e2e8f0; --text:#0f172a; --muted:#64748b; --accent:#0891b2; --head:#f1f5f9; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f172a; --card:#1e293b; --line:#334155; --text:#f1f5f9; --muted:#94a3b8; --accent:#0e7490; --head:#273449; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+  aside { width:240px; flex-shrink:0; border-right:1px solid var(--line); background:var(--card); padding:16px 8px; overflow-y:auto; }
+  aside h1 { font-size:13px; margin:0 8px 12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  aside button { display:flex; justify-content:space-between; width:100%; border:0; background:none; color:inherit; font:inherit; padding:7px 8px; border-radius:6px; cursor:pointer; text-align:left; }
+  aside button:hover { background:var(--head); }
+  aside button.on { background:var(--accent); color:#fff; }
+  aside small { opacity:.7; }
+  main { flex:1; min-width:0; padding:20px; }
+  h2 { margin:0 0 4px; font-size:20px; }
+  .meta { color:var(--muted); margin-bottom:12px; }
+  .wrap { overflow:auto; border:1px solid var(--line); border-radius:8px; background:var(--card); max-height:calc(100vh - 150px); }
+  table { border-collapse:collapse; width:100%; }
+  th, td { padding:6px 10px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; max-width:320px; overflow:hidden; text-overflow:ellipsis; }
+  th { position:sticky; top:0; background:var(--head); font-size:12px; }
+  th span { display:block; font-weight:400; color:var(--muted); font-size:11px; }
+  td.null { color:var(--muted); font-style:italic; }
+  .pager { display:flex; gap:8px; align-items:center; margin-top:12px; }
+  .pager button { padding:5px 12px; border:1px solid var(--line); border-radius:6px; background:var(--card); color:inherit; cursor:pointer; }
+  .pager button:disabled { opacity:.4; cursor:default; }
+  .err { color:#dc2626; }
+  @media (max-width:700px) { body { flex-direction:column; } aside { width:auto; border-right:0; border-bottom:1px solid var(--line); } }
+</style>
+</head>
+<body>
+<aside><h1 id="db">Database</h1><div id="tables"></div></aside>
+<main><div id="out" class="meta">Loading...</div></main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function get(path) {
+  const res = await fetch(path);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+async function open(name, page = 0) {
+  document.querySelectorAll("aside button").forEach((b) => b.classList.toggle("on", b.dataset.name === name));
+  try {
+    const d = await get("/api/tables/" + encodeURIComponent(name) + "?page=" + page);
+    const from = d.total ? d.page * d.pageSize + 1 : 0;
+    const to = Math.min(d.total, (d.page + 1) * d.pageSize);
+    const head = d.columns.map((c) => "<th>" + esc(c.name) + (c.key === "PRI" ? " (key)" : "") + "<span>" + esc(c.type) + "</span></th>").join("");
+    const body = d.rows.map((r) => "<tr>" + d.columns.map((c) => {
+      const v = r[c.name];
+      return v === null ? '<td class="null">NULL</td>' : '<td title="' + esc(v) + '">' + esc(v) + "</td>";
+    }).join("") + "</tr>").join("");
+
+    $("out").className = "";
+    $("out").innerHTML =
+      "<h2>" + esc(name) + "</h2>" +
+      '<div class="meta">' + d.total + " rows" + (d.hidden ? " &middot; " + d.hidden + " secret column(s) hidden" : "") + " &middot; read only</div>" +
+      '<div class="wrap"><table><thead><tr>' + head + "</tr></thead><tbody>" +
+      (body || '<tr><td colspan="' + d.columns.length + '">No rows</td></tr>') +
+      "</tbody></table></div>" +
+      '<div class="pager"><button id="prev"' + (d.page === 0 ? " disabled" : "") + ">Previous</button>" +
+      "<span>" + from + "-" + to + " of " + d.total + "</span>" +
+      '<button id="next"' + (to >= d.total ? " disabled" : "") + ">Next</button></div>";
+    $("prev").onclick = () => open(name, d.page - 1);
+    $("next").onclick = () => open(name, d.page + 1);
+  } catch (e) {
+    $("out").innerHTML = '<p class="err">' + esc(e.message) + "</p>";
+  }
+}
+
+(async function init() {
+  try {
+    const d = await get("/api/tables");
+    $("db").textContent = d.database;
+    $("tables").innerHTML = d.tables.map((t) => '<button data-name="' + esc(t.name) + '">' + esc(t.name) + "<small>" + t.rows + "</small></button>").join("");
+    document.querySelectorAll("aside button").forEach((b) => (b.onclick = () => open(b.dataset.name)));
+    $("out").textContent = "Pick a table on the left.";
+    if (d.tables.some((t) => t.name === "users")) open("users");
+  } catch (e) {
+    $("out").innerHTML = '<p class="err">Could not read the database: ' + esc(e.message) + "<br>Is MySQL running and is DB_PASSWORD set in server/.env?</p>";
+  }
+})();
+</script>
+</body>
+</html>

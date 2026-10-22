@@ -1,0 +1,413 @@
+@import "tailwindcss";
+
+/* =========================================================
+   PORTAL ACCENT COLOURS
+   Shared components (buttons, tabs, modals, inputs, pagination)
+   use the `accent` / `accent2` colours, which follow the portal:
+   patient = cyan/emerald, doctor = indigo/violet, admin = blue/sky.
+   ========================================================= */
+
+@theme inline {
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-200: var(--accent-200);
+  --color-accent-300: var(--accent-300);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-700: var(--accent-700);
+  --color-accent-800: var(--accent-800);
+  --color-accent2-50: var(--accent2-50);
+  --color-accent2-500: var(--accent2-500);
+  --color-accent2-600: var(--accent2-600);
+}
+
+:root,
+[data-portal="patient"] {
+  --accent-50: #ecfeff;
+  --accent-100: #cffafe;
+  --accent-200: #a5f3fc;
+  --accent-300: #67e8f9;
+  --accent-500: #06b6d4;
+  --accent-600: #0891b2;
+  --accent-700: #0e7490;
+  --accent-800: #155e75;
+  --accent2-50: #ecfdf5;
+  --accent2-500: #10b981;
+  --accent2-600: #059669;
+}
+
+[data-portal="doctor"] {
+  --accent-50: #eef2ff;
+  --accent-100: #e0e7ff;
+  --accent-200: #c7d2fe;
+  --accent-300: #a5b4fc;
+  --accent-500: #6366f1;
+  --accent-600: #4f46e5;
+  --accent-700: #4338ca;
+  --accent-800: #3730a3;
+  --accent2-50: #f5f3ff;
+  --accent2-500: #8b5cf6;
+  --accent2-600: #7c3aed;
+}
+
+[data-portal="admin"] {
+  --accent-50: #eff6ff;
+  --accent-100: #dbeafe;
+  --accent-200: #bfdbfe;
+  --accent-300: #93c5fd;
+  --accent-500: #3b82f6;
+  --accent-600: #2563eb;
+  --accent-700: #1d4ed8;
+  --accent-800: #1e40af;
+  --accent2-50: #f0f9ff;
+  --accent2-500: #0ea5e9;
+  --accent2-600: #0284c7;
+}
+
+/* =========================================================
+   GLOBAL BASE STYLES
+   ========================================================= */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  ::selection {
+    background: rgba(6, 182, 212, 0.25);
+  }
+}
+
+/* =========================================================
+   ROOT
+   ========================================================= */
+
+#root {
+  min-height: 100vh;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(6, 182, 212, 0.35);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   APPLICATION FALLBACK CLASSES
+   These keep the layout usable if a component still contains
+   older class names while the Tailwind migration is happening.
+   ========================================================= */
+
+.app-layout {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.app-body {
+  display: flex;
+  min-height: calc(100vh - 72px);
+}
+
+.app-content {
+  min-width: 0;
+  flex: 1;
+}
+
+/* =========================================================
+   AUTH FALLBACK
+   ========================================================= */
+
+.auth-page {
+  min-height: 100vh;
+}
+
+/* =========================================================
+   GENERAL TRANSITIONS
+   ========================================================= */
+
+a,
+button {
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
+}
+
+/* =========================================================
+   CUSTOM ANIMATIONS
+   ========================================================= */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================================================
+   UTILITY ANIMATION CLASSES
+   ========================================================= */
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.35s ease-out both;
+}
+
+/* =========================================================
+   MEDICAL STATUS HELPERS
+   ========================================================= */
+
+.status-online {
+  position: relative;
+}
+
+.status-online::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+.status-warning {
+  position: relative;
+}
+
+.status-warning::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
+}
+
+.status-danger {
+  position: relative;
+}
+
+.status-danger::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+}
+
+/* =========================================================
+   MOBILE SAFETY
+   ========================================================= */
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .app-body {
+    min-height: calc(100vh - 64px);
+  }
+
+  .app-content {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* =========================================================
+   LOGIN ANIMATED BACKGROUND (MedicalBackdrop.jsx)
+   All animations loop forever.
+   ========================================================= */
+
+@keyframes ecg-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes ecg-trace {
+  from { stroke-dashoffset: 1200; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes cross-rise {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-115vh) rotate(180deg); opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.35; }
+  14% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.6; }
+  28% { transform: translate(-50%, -50%) scale(1); opacity: 0.35; }
+  42% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.5; }
+}
+
+.ecg-scroll { animation: ecg-scroll 12s linear infinite; }
+.ecg-trace { stroke-dasharray: 300 900; animation: ecg-trace 3s linear infinite; }
+.cross-rise { animation: cross-rise linear infinite; }
+.glow-pulse { animation: glow-pulse 2.4s ease-in-out infinite; }
+

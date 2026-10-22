@@ -1,0 +1,98 @@
+{
+  "name": "healthcare-system",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "server": "node server/index.js",
+    "server:dev": "node --watch server/index.js",
+    "dev:all": "concurrently -k -n db,api,web -c yellow,blue,green \"npm:db:up\" \"npm:server:dev\" \"npm:dev\"",
+    "db:up": "node server/scripts/db-up.js",
+    "db:shell": "node server/scripts/db-shell.js",
+    "db:view": "node tools/db-viewer/server.mjs",
+    "db:export": "rolldown server/scripts/export-demo.js --format esm --platform node --file node_modules/.cache/export-demo.mjs && node node_modules/.cache/export-demo.mjs",
+    "db:start": "node server/scripts/dev-mysql.js",
+    "db:setup": "node server/scripts/setup-db.js",
+    "test:tr": "vitest run --config vitest.tr.config.js",
+    "i18n:check": "node tools/i18n/check.mjs --list",
+    "i18n:suspects": "node tools/i18n/suspects.mjs",
+    "test:api": "vitest run --config vitest.server.config.js",
+    "electron:dev": "vite build && electron .",
+    "electron:build": "vite build && electron-builder --win"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "google-auth-library": "^11.3.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.24.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@babel/parser": "^8.0.7",
+    "@babel/traverse": "^8.0.7",
+    "@eslint/js": "^10.0.1",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "concurrently": "^10.0.6",
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3",
+    "eslint": "^10.10.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.6",
+    "globals": "^17.12.0",
+    "jsdom": "^30.1.2",
+    "supertest": "^7.3.1",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.3"
+  },
+  "description": "Centralized Healthcare Management System",
+  "author": "Aria Safaeipour",
+  "main": "electron/main.js",
+  "build": {
+    "appId": "com.ariasafaeipour.healthcare",
+    "productName": "Healthcare Management System",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**",
+      "dist/**",
+      "server/**",
+      "!server/test/**",
+      "!server/scripts/**",
+      "!server/.env",
+      "!server/.env.example",
+      "src/utils/validation/feedbackRules.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "electronDist": "node_modules/electron/dist"
+  }
+}

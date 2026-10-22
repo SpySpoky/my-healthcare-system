@@ -1,0 +1,2 @@
+src/pages/Messages.jsx:186: template with a complex expression: `${contact.name} (${[getRoleLabel(contact.role), contact.department && t(contact.departmen
+src/pages/patient/MedicalRecords.jsx:652: template with a complex expression: `P-${String(patient.id).padStart(5, "0")}`

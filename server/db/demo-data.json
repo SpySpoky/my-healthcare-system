@@ -1,0 +1,2004 @@
+{
+  "departments": [
+    "Cardiology",
+    "Dermatology",
+    "Emergency",
+    "General Medicine",
+    "Neurology",
+    "Orthopedics",
+    "Pediatrics",
+    "Radiology",
+    "Reception"
+  ],
+  "users": [
+    {
+      "name": "John Smith",
+      "email": "patient@test.com",
+      "phone": "+90 555 123 4567",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -250,
+      "lastLogin": 0,
+      "dateOfBirth": "1984-03-15",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Emily Johnson",
+      "email": "emily.johnson@example.com",
+      "phone": "+90 555 322 4246",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -233,
+      "lastLogin": -1,
+      "dateOfBirth": "1991-07-02",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Michael Brown",
+      "email": "michael.brown@example.com",
+      "phone": "+90 555 433 4369",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -216,
+      "lastLogin": -2,
+      "dateOfBirth": "1975-01-21",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Sarah Wilson",
+      "email": "sarah.wilson@example.com",
+      "phone": "+90 555 544 4492",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -199,
+      "lastLogin": -3,
+      "dateOfBirth": "1996-11-09",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "David Miller",
+      "email": "david.miller@example.com",
+      "phone": "+90 555 655 4615",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -182,
+      "lastLogin": -4,
+      "dateOfBirth": "1979-04-30",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Emma Davis",
+      "email": "emma.davis@example.com",
+      "phone": "+90 555 766 4738",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -165,
+      "lastLogin": 0,
+      "dateOfBirth": "1995-08-17",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "James Taylor",
+      "email": "james.taylor@example.com",
+      "phone": "+90 555 877 4861",
+      "role": "patient",
+      "status": "Inactive",
+      "department": null,
+      "joined": -148,
+      "lastLogin": -60,
+      "dateOfBirth": "1968-06-05",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Olivia Martin",
+      "email": "olivia.martin@example.com",
+      "phone": "+90 555 988 4984",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -131,
+      "lastLogin": -2,
+      "dateOfBirth": "1999-12-12",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Robert Anderson",
+      "email": "robert.anderson@example.com",
+      "phone": "+90 555 099 5107",
+      "role": "patient",
+      "status": "Inactive",
+      "department": null,
+      "joined": -114,
+      "lastLogin": -60,
+      "dateOfBirth": "1963-02-28",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Sophia Thomas",
+      "email": "sophia.thomas@example.com",
+      "phone": "+90 555 210 5230",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -97,
+      "lastLogin": -4,
+      "dateOfBirth": "1986-10-14",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Daniel Jackson",
+      "email": "daniel.jackson@example.com",
+      "phone": "+90 555 321 5353",
+      "role": "patient",
+      "status": "Suspended",
+      "department": null,
+      "joined": -80,
+      "lastLogin": 0,
+      "dateOfBirth": "1982-05-19",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Isabella White",
+      "email": "isabella.white@example.com",
+      "phone": "+90 555 432 5476",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -63,
+      "lastLogin": -1,
+      "dateOfBirth": "1993-03-23",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "William Harris",
+      "email": "william.harris@example.com",
+      "phone": "+90 555 543 5599",
+      "role": "patient",
+      "status": "Active",
+      "department": null,
+      "joined": -46,
+      "lastLogin": -2,
+      "dateOfBirth": "1971-09-08",
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Dr. Sarah Johnson",
+      "email": "doctor@test.com",
+      "phone": "+90 555 700 1100",
+      "role": "doctor",
+      "status": "Active",
+      "department": "Cardiology",
+      "joined": -270,
+      "lastLogin": 0,
+      "dateOfBirth": null,
+      "staffType": "doctor",
+      "slug": "sarah-johnson",
+      "specialty": "Cardiology Specialist",
+      "license": "MD-TR-100101"
+    },
+    {
+      "name": "Dr. Michael Smith",
+      "email": "michael.smith@healthcare.test",
+      "phone": "+90 555 701 1111",
+      "role": "doctor",
+      "status": "Active",
+      "department": "General Medicine",
+      "joined": -250,
+      "lastLogin": -1,
+      "dateOfBirth": null,
+      "staffType": "doctor",
+      "slug": "michael-smith",
+      "specialty": "General Medicine Specialist",
+      "license": "MD-TR-100102"
+    },
+    {
+      "name": "Dr. Emily Brown",
+      "email": "emily.brown@healthcare.test",
+      "phone": "+90 555 702 1122",
+      "role": "doctor",
+      "status": "Active",
+      "department": "Dermatology",
+      "joined": -230,
+      "lastLogin": -2,
+      "dateOfBirth": null,
+      "staffType": "doctor",
+      "slug": "emily-brown",
+      "specialty": "Dermatology Specialist",
+      "license": "MD-TR-100103"
+    },
+    {
+      "name": "Dr. David Wilson",
+      "email": "david.wilson@healthcare.test",
+      "phone": "+90 555 703 1133",
+      "role": "doctor",
+      "status": "Active",
+      "department": "General Medicine",
+      "joined": -210,
+      "lastLogin": 0,
+      "dateOfBirth": null,
+      "staffType": "doctor",
+      "slug": "david-wilson",
+      "specialty": "General Medicine Specialist",
+      "license": "MD-TR-100104"
+    },
+    {
+      "name": "Dr. Anna Martin",
+      "email": "anna.martin@healthcare.test",
+      "phone": "+90 555 704 1144",
+      "role": "doctor",
+      "status": "Active",
+      "department": "Neurology",
+      "joined": -190,
+      "lastLogin": -1,
+      "dateOfBirth": null,
+      "staffType": "doctor",
+      "slug": "anna-martin",
+      "specialty": "Neurology Specialist",
+      "license": "MD-TR-100105"
+    },
+    {
+      "name": "Dr. James Anderson",
+      "email": "james.anderson@healthcare.test",
+      "phone": "+90 555 705 1155",
+      "role": "doctor",
+      "status": "Active",
+      "department": "Orthopedics",
+      "joined": -170,
+      "lastLogin": -2,
+      "dateOfBirth": null,
+      "staffType": "doctor",
+      "slug": "james-anderson",
+      "specialty": "Orthopedics Specialist",
+      "license": "MD-TR-100106"
+    },
+    {
+      "name": "Nurse Laura Kim",
+      "email": "staff@test.com",
+      "phone": "+90 555 801 2200",
+      "role": "medical_staff",
+      "status": "Active",
+      "department": "Cardiology",
+      "joined": -230,
+      "lastLogin": 0,
+      "dateOfBirth": null,
+      "staffType": "nurse",
+      "slug": null,
+      "specialty": null,
+      "license": "RN-TR-100101"
+    },
+    {
+      "name": "Nurse Ahmet Yilmaz",
+      "email": "ahmet.yilmaz@healthcare.test",
+      "phone": "+90 555 801 3300",
+      "role": "medical_staff",
+      "status": "Active",
+      "department": "General Medicine",
+      "joined": -180,
+      "lastLogin": -1,
+      "dateOfBirth": null,
+      "staffType": "nurse",
+      "slug": null,
+      "specialty": null,
+      "license": "RN-TR-100102"
+    },
+    {
+      "name": "Technician Mia Clarke",
+      "email": "mia.clarke@healthcare.test",
+      "phone": "+90 555 801 4400",
+      "role": "medical_staff",
+      "status": "Inactive",
+      "department": "Radiology",
+      "joined": -140,
+      "lastLogin": -52,
+      "dateOfBirth": null,
+      "staffType": "technician",
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Test Administrator",
+      "email": "admin@test.com",
+      "phone": "+90 555 900 0001",
+      "role": "admin",
+      "status": "Active",
+      "department": null,
+      "joined": -280,
+      "lastLogin": 0,
+      "dateOfBirth": null,
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    },
+    {
+      "name": "Elif Demir",
+      "email": "elif.demir@healthcare.test",
+      "phone": "+90 555 900 0002",
+      "role": "admin",
+      "status": "Active",
+      "department": null,
+      "joined": -270,
+      "lastLogin": -2,
+      "dateOfBirth": null,
+      "staffType": null,
+      "slug": null,
+      "specialty": null,
+      "license": null
+    }
+  ],
+  "patients": [
+    {
+      "email": "patient@test.com",
+      "gender": "Male",
+      "bloodType": "O+",
+      "allergies": "Penicillin",
+      "address": "11 Atatürk Street, Famagusta",
+      "emergencyContactName": "Sarah Smith",
+      "emergencyContactPhone": "+90 555 987 6543"
+    },
+    {
+      "email": "emily.johnson@example.com",
+      "gender": "Female",
+      "bloodType": "A+",
+      "allergies": "None known",
+      "address": "12 Atatürk Street, Nicosia",
+      "emergencyContactName": "Mark Johnson",
+      "emergencyContactPhone": "+90 555 876 5432"
+    },
+    {
+      "email": "michael.brown@example.com",
+      "gender": "Male",
+      "bloodType": "B+",
+      "allergies": "Ibuprofen",
+      "address": "13 Atatürk Street, Kyrenia",
+      "emergencyContactName": "Linda Brown",
+      "emergencyContactPhone": "+90 555 765 4321"
+    },
+    {
+      "email": "sarah.wilson@example.com",
+      "gender": "Female",
+      "bloodType": "AB+",
+      "allergies": "Pollen",
+      "address": "14 Atatürk Street, Morphou",
+      "emergencyContactName": "Tom Wilson",
+      "emergencyContactPhone": "+90 555 654 3210"
+    },
+    {
+      "email": "david.miller@example.com",
+      "gender": "Male",
+      "bloodType": "O-",
+      "allergies": "None known",
+      "address": "15 Atatürk Street, Iskele",
+      "emergencyContactName": "Anna Miller",
+      "emergencyContactPhone": "+90 555 543 2109"
+    },
+    {
+      "email": "emma.davis@example.com",
+      "gender": "Female",
+      "bloodType": "A-",
+      "allergies": "Latex",
+      "address": "16 Atatürk Street, Famagusta",
+      "emergencyContactName": "Chris Davis",
+      "emergencyContactPhone": "+90 555 432 1098"
+    },
+    {
+      "email": "james.taylor@example.com",
+      "gender": "Male",
+      "bloodType": "B-",
+      "allergies": "Sulfa drugs",
+      "address": "17 Atatürk Street, Nicosia",
+      "emergencyContactName": "Mary Taylor",
+      "emergencyContactPhone": "+90 555 321 0987"
+    },
+    {
+      "email": "olivia.martin@example.com",
+      "gender": "Female",
+      "bloodType": "O+",
+      "allergies": "None known",
+      "address": "18 Atatürk Street, Kyrenia",
+      "emergencyContactName": "Paul Martin",
+      "emergencyContactPhone": "+90 555 210 9876"
+    },
+    {
+      "email": "robert.anderson@example.com",
+      "gender": "Male",
+      "bloodType": "A+",
+      "allergies": "Aspirin",
+      "address": "19 Atatürk Street, Morphou",
+      "emergencyContactName": "Helen Anderson",
+      "emergencyContactPhone": "+90 555 109 8765"
+    },
+    {
+      "email": "sophia.thomas@example.com",
+      "gender": "Female",
+      "bloodType": "AB-",
+      "allergies": "None known",
+      "address": "20 Atatürk Street, Iskele",
+      "emergencyContactName": "Daniel Thomas",
+      "emergencyContactPhone": "+90 555 098 7654"
+    },
+    {
+      "email": "daniel.jackson@example.com",
+      "gender": "Male",
+      "bloodType": "O+",
+      "allergies": "Shellfish",
+      "address": "21 Atatürk Street, Famagusta",
+      "emergencyContactName": "Rachel Jackson",
+      "emergencyContactPhone": "+90 555 222 3344"
+    },
+    {
+      "email": "isabella.white@example.com",
+      "gender": "Female",
+      "bloodType": "B+",
+      "allergies": "None known",
+      "address": "22 Atatürk Street, Nicosia",
+      "emergencyContactName": "Henry White",
+      "emergencyContactPhone": "+90 555 444 5566"
+    },
+    {
+      "email": "william.harris@example.com",
+      "gender": "Male",
+      "bloodType": "A+",
+      "allergies": "Codeine",
+      "address": "23 Atatürk Street, Kyrenia",
+      "emergencyContactName": "Grace Harris",
+      "emergencyContactPhone": "+90 555 666 7788"
+    }
+  ],
+  "availability": {
+    "sarah-johnson": [
+      {
+        "id": 1,
+        "day": "Monday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 2,
+        "day": "Monday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 3,
+        "day": "Tuesday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 4,
+        "day": "Tuesday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 5,
+        "day": "Thursday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 6,
+        "day": "Thursday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 7,
+        "day": "Friday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      }
+    ],
+    "michael-smith": [
+      {
+        "id": 1,
+        "day": "Monday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 2,
+        "day": "Monday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 3,
+        "day": "Tuesday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 4,
+        "day": "Wednesday",
+        "startTime": "10:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 5,
+        "day": "Thursday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 6,
+        "day": "Thursday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 7,
+        "day": "Friday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      }
+    ],
+    "emily-brown": [
+      {
+        "id": 1,
+        "day": "Monday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 2,
+        "day": "Monday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 3,
+        "day": "Tuesday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 4,
+        "day": "Wednesday",
+        "startTime": "10:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 5,
+        "day": "Thursday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 6,
+        "day": "Thursday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      }
+    ],
+    "david-wilson": [
+      {
+        "id": 1,
+        "day": "Monday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 2,
+        "day": "Tuesday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 3,
+        "day": "Tuesday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 4,
+        "day": "Wednesday",
+        "startTime": "10:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 5,
+        "day": "Thursday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 6,
+        "day": "Friday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      }
+    ],
+    "anna-martin": [
+      {
+        "id": 1,
+        "day": "Monday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 2,
+        "day": "Tuesday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 3,
+        "day": "Tuesday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 4,
+        "day": "Wednesday",
+        "startTime": "10:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 5,
+        "day": "Thursday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 6,
+        "day": "Friday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      }
+    ],
+    "james-anderson": [
+      {
+        "id": 1,
+        "day": "Monday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 2,
+        "day": "Monday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 3,
+        "day": "Tuesday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      },
+      {
+        "id": 4,
+        "day": "Tuesday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 5,
+        "day": "Thursday",
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "status": "Available"
+      },
+      {
+        "id": 6,
+        "day": "Thursday",
+        "startTime": "14:00",
+        "endTime": "17:00",
+        "status": "Available"
+      },
+      {
+        "id": 7,
+        "day": "Friday",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "status": "Available"
+      }
+    ]
+  },
+  "appointments": [
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 0,
+      "time": "09:00 AM",
+      "reason": "Blood pressure review",
+      "symptoms": "Occasional headaches",
+      "status": "Confirmed"
+    },
+    {
+      "patientEmail": "emily.johnson@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 0,
+      "time": "10:30 AM",
+      "reason": "Cardiology follow-up",
+      "symptoms": "Chest discomfort during exercise",
+      "status": "Confirmed"
+    },
+    {
+      "patientEmail": "michael.brown@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 0,
+      "time": "02:00 PM",
+      "reason": "Consultation",
+      "symptoms": "Shortness of breath",
+      "status": "Pending"
+    },
+    {
+      "patientEmail": "sarah.wilson@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 0,
+      "time": "03:30 PM",
+      "reason": "Medical review",
+      "symptoms": "Palpitations",
+      "status": "Confirmed"
+    },
+    {
+      "patientEmail": "david.miller@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 1,
+      "time": "10:00 AM",
+      "reason": "General consultation",
+      "symptoms": "Fatigue",
+      "status": "Pending"
+    },
+    {
+      "patientEmail": "emma.davis@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 2,
+      "time": "02:30 PM",
+      "reason": "Follow-up examination",
+      "symptoms": "Dizziness",
+      "status": "Confirmed"
+    },
+    {
+      "patientEmail": "olivia.martin@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 3,
+      "time": "11:00 AM",
+      "reason": "ECG review",
+      "symptoms": "Irregular heartbeat",
+      "status": "Confirmed"
+    },
+    {
+      "patientEmail": "sophia.thomas@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 7,
+      "time": "09:30 AM",
+      "reason": "Annual heart check",
+      "symptoms": "None reported",
+      "status": "Pending"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "sarah-johnson",
+      "day": -24,
+      "time": "09:30 AM",
+      "reason": "Heart check-up",
+      "symptoms": "Routine check",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "emily.johnson@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": -14,
+      "time": "10:30 AM",
+      "reason": "Cardiology consultation",
+      "symptoms": "Chest discomfort",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "daniel.jackson@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": -6,
+      "time": "11:00 AM",
+      "reason": "Chest pain assessment",
+      "symptoms": "Chest pain after exercise",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "isabella.white@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": -3,
+      "time": "02:00 PM",
+      "reason": "Follow-up",
+      "symptoms": "Mild palpitations",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "william.harris@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": -2,
+      "time": "10:00 AM",
+      "reason": "Consultation",
+      "symptoms": "High blood pressure",
+      "status": "Cancelled"
+    },
+    {
+      "patientEmail": "james.taylor@example.com",
+      "doctorSlug": "sarah-johnson",
+      "day": 4,
+      "time": "03:00 PM",
+      "reason": "Medical review",
+      "symptoms": "Swollen ankles",
+      "status": "Cancelled"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "emily-brown",
+      "day": 2,
+      "time": "02:30 PM",
+      "reason": "Skin consultation",
+      "symptoms": "Itchy rash on arm",
+      "status": "Pending"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "david-wilson",
+      "day": 8,
+      "time": "11:30 AM",
+      "reason": "General consultation",
+      "symptoms": "Follow-up on headaches",
+      "status": "Confirmed"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "michael-smith",
+      "day": -16,
+      "time": "11:00 AM",
+      "reason": "Follow-up consultation",
+      "symptoms": "Recurring headaches",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "sarah-johnson",
+      "day": -31,
+      "time": "09:00 AM",
+      "reason": "Heart check-up",
+      "symptoms": "Routine check",
+      "status": "Cancelled"
+    },
+    {
+      "patientEmail": "michael.brown@example.com",
+      "doctorSlug": "james-anderson",
+      "day": -11,
+      "time": "02:00 PM",
+      "reason": "Back pain review",
+      "symptoms": "Lower back pain",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "sarah.wilson@example.com",
+      "doctorSlug": "michael-smith",
+      "day": -12,
+      "time": "03:30 PM",
+      "reason": "Persistent cough",
+      "symptoms": "Cough for three weeks",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "robert.anderson@example.com",
+      "doctorSlug": "anna-martin",
+      "day": 5,
+      "time": "10:00 AM",
+      "reason": "Neurology consultation",
+      "symptoms": "Numbness in hands",
+      "status": "Confirmed"
+    },
+    {
+      "patientEmail": "david.miller@example.com",
+      "doctorSlug": "david-wilson",
+      "day": -20,
+      "time": "11:00 AM",
+      "reason": "General check-up",
+      "symptoms": "None reported",
+      "status": "Completed"
+    }
+  ],
+  "records": [
+    {
+      "patientEmail": "patient@test.com",
+      "visits": [
+        {
+          "day": -90,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Vitamin D 1000 IU",
+              "dosage": "1 tablet",
+              "instruction": "Take with breakfast.",
+              "day": -90,
+              "frequency": "Once daily",
+              "duration": "30 days",
+              "status": "Completed"
+            }
+          ],
+          "title": "Initial Consultation",
+          "note": "Patient presented with headaches and fatigue.",
+          "diagnosis": "Fatigue",
+          "treatment": "Improved sleep schedule and hydration recommended.",
+          "diagnosisStatus": "Resolved"
+        },
+        {
+          "day": -24,
+          "doctorSlug": "sarah-johnson",
+          "prescriptions": [],
+          "title": "Cardiology Check-up",
+          "note": "Routine heart check-up. Blood pressure slightly elevated.",
+          "diagnosis": "Elevated Blood Pressure",
+          "treatment": "Monitor blood pressure at home and review in clinic.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Recheck blood pressure at the next cardiology visit."
+        },
+        {
+          "day": -16,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Paracetamol 500mg",
+              "dosage": "1 tablet",
+              "instruction": "Take with water after food.",
+              "day": -16,
+              "frequency": "Every 6 hours when needed",
+              "duration": "5 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Follow-up Consultation",
+          "note": "Follow-up for recurring headaches. Symptoms are improving.",
+          "diagnosis": "Tension Headache",
+          "treatment": "Mild recurring headaches. No serious symptoms reported.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Maintain regular sleep and hydration. Return if headaches continue."
+        }
+      ],
+      "vitals": {
+        "heartRate": "76",
+        "bloodPressure": "132/84",
+        "temperature": "36.7",
+        "oxygen": "98",
+        "weight": "78",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "emily.johnson@example.com",
+      "visits": [
+        {
+          "day": -14,
+          "doctorSlug": "sarah-johnson",
+          "prescriptions": [
+            {
+              "medication": "Amlodipine 5mg",
+              "dosage": "1 tablet",
+              "instruction": "Take in the morning. Monitor blood pressure weekly.",
+              "day": -14,
+              "frequency": "Once daily",
+              "duration": "90 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Cardiology Consultation",
+          "note": "Patient reported chest discomfort during exercise.",
+          "diagnosis": "Stage 1 Hypertension",
+          "treatment": "Elevated readings on three visits. Medication started.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Reduce salt intake. Review readings at the follow-up."
+        }
+      ],
+      "vitals": {
+        "heartRate": "78",
+        "bloodPressure": "134/86",
+        "temperature": "36.6",
+        "oxygen": "97",
+        "weight": "68",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "michael.brown@example.com",
+      "visits": [
+        {
+          "day": -11,
+          "doctorSlug": "james-anderson",
+          "prescriptions": [
+            {
+              "medication": "Naproxen 250mg",
+              "dosage": "1 tablet",
+              "instruction": "Take with food. Stop if stomach pain occurs.",
+              "day": -11,
+              "frequency": "Twice daily",
+              "duration": "10 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Orthopedic Review",
+          "note": "Lower back pain reviewed after physiotherapy.",
+          "diagnosis": "Lumbar Muscle Strain",
+          "treatment": "No neurological symptoms. Physiotherapy continued.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Mobility improved. Continue home exercises for another month."
+        }
+      ],
+      "vitals": {
+        "heartRate": "70",
+        "bloodPressure": "122/79",
+        "temperature": "36.8",
+        "oxygen": "98",
+        "weight": "82",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "sarah.wilson@example.com",
+      "visits": [
+        {
+          "day": -12,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Dextromethorphan Syrup",
+              "dosage": "10 ml",
+              "instruction": "Do not exceed the stated dose.",
+              "day": -12,
+              "frequency": "Three times daily",
+              "duration": "7 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Respiratory Review",
+          "note": "Persistent cough for three weeks. Chest examination performed.",
+          "diagnosis": "Acute Bronchitis",
+          "treatment": "Clear chest X-ray. Rest and symptomatic treatment advised.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Return if fever develops or the cough lasts two more weeks."
+        }
+      ],
+      "vitals": {
+        "heartRate": "84",
+        "bloodPressure": "118/76",
+        "temperature": "37.4",
+        "oxygen": "96",
+        "weight": "61",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "david.miller@example.com",
+      "visits": [
+        {
+          "day": -20,
+          "doctorSlug": "david-wilson",
+          "prescriptions": [],
+          "title": "Annual Physical",
+          "note": "Routine annual physical examination. No complaints."
+        }
+      ],
+      "vitals": {
+        "heartRate": "68",
+        "bloodPressure": "116/75",
+        "temperature": "36.6",
+        "oxygen": "99",
+        "weight": "70",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "emma.davis@example.com",
+      "visits": [
+        {
+          "day": -90,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Vitamin D 1000 IU",
+              "dosage": "1 tablet",
+              "instruction": "Take with breakfast.",
+              "day": -90,
+              "frequency": "Once daily",
+              "duration": "30 days",
+              "status": "Completed"
+            }
+          ],
+          "title": "Initial Consultation",
+          "note": "Patient presented with headaches and fatigue.",
+          "diagnosis": "Fatigue",
+          "treatment": "Improved sleep schedule and hydration recommended.",
+          "diagnosisStatus": "Resolved"
+        },
+        {
+          "day": -24,
+          "doctorSlug": "sarah-johnson",
+          "prescriptions": [],
+          "title": "Cardiology Check-up",
+          "note": "Routine heart check-up. Blood pressure slightly elevated.",
+          "diagnosis": "Elevated Blood Pressure",
+          "treatment": "Monitor blood pressure at home and review in clinic.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Recheck blood pressure at the next cardiology visit."
+        },
+        {
+          "day": -16,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Paracetamol 500mg",
+              "dosage": "1 tablet",
+              "instruction": "Take with water after food.",
+              "day": -16,
+              "frequency": "Every 6 hours when needed",
+              "duration": "5 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Follow-up Consultation",
+          "note": "Follow-up for recurring headaches. Symptoms are improving.",
+          "diagnosis": "Tension Headache",
+          "treatment": "Mild recurring headaches. No serious symptoms reported.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Maintain regular sleep and hydration. Return if headaches continue."
+        }
+      ],
+      "vitals": {
+        "heartRate": "76",
+        "bloodPressure": "132/84",
+        "temperature": "36.7",
+        "oxygen": "98",
+        "weight": "78",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "james.taylor@example.com",
+      "visits": [
+        {
+          "day": -14,
+          "doctorSlug": "sarah-johnson",
+          "prescriptions": [
+            {
+              "medication": "Amlodipine 5mg",
+              "dosage": "1 tablet",
+              "instruction": "Take in the morning. Monitor blood pressure weekly.",
+              "day": -14,
+              "frequency": "Once daily",
+              "duration": "90 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Cardiology Consultation",
+          "note": "Patient reported chest discomfort during exercise.",
+          "diagnosis": "Stage 1 Hypertension",
+          "treatment": "Elevated readings on three visits. Medication started.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Reduce salt intake. Review readings at the follow-up."
+        }
+      ],
+      "vitals": {
+        "heartRate": "78",
+        "bloodPressure": "134/86",
+        "temperature": "36.6",
+        "oxygen": "97",
+        "weight": "68",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "olivia.martin@example.com",
+      "visits": [
+        {
+          "day": -11,
+          "doctorSlug": "james-anderson",
+          "prescriptions": [
+            {
+              "medication": "Naproxen 250mg",
+              "dosage": "1 tablet",
+              "instruction": "Take with food. Stop if stomach pain occurs.",
+              "day": -11,
+              "frequency": "Twice daily",
+              "duration": "10 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Orthopedic Review",
+          "note": "Lower back pain reviewed after physiotherapy.",
+          "diagnosis": "Lumbar Muscle Strain",
+          "treatment": "No neurological symptoms. Physiotherapy continued.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Mobility improved. Continue home exercises for another month."
+        }
+      ],
+      "vitals": {
+        "heartRate": "70",
+        "bloodPressure": "122/79",
+        "temperature": "36.8",
+        "oxygen": "98",
+        "weight": "82",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "robert.anderson@example.com",
+      "visits": [
+        {
+          "day": -12,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Dextromethorphan Syrup",
+              "dosage": "10 ml",
+              "instruction": "Do not exceed the stated dose.",
+              "day": -12,
+              "frequency": "Three times daily",
+              "duration": "7 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Respiratory Review",
+          "note": "Persistent cough for three weeks. Chest examination performed.",
+          "diagnosis": "Acute Bronchitis",
+          "treatment": "Clear chest X-ray. Rest and symptomatic treatment advised.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Return if fever develops or the cough lasts two more weeks."
+        }
+      ],
+      "vitals": {
+        "heartRate": "84",
+        "bloodPressure": "118/76",
+        "temperature": "37.4",
+        "oxygen": "96",
+        "weight": "61",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "sophia.thomas@example.com",
+      "visits": [
+        {
+          "day": -20,
+          "doctorSlug": "david-wilson",
+          "prescriptions": [],
+          "title": "Annual Physical",
+          "note": "Routine annual physical examination. No complaints."
+        }
+      ],
+      "vitals": {
+        "heartRate": "68",
+        "bloodPressure": "116/75",
+        "temperature": "36.6",
+        "oxygen": "99",
+        "weight": "70",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "daniel.jackson@example.com",
+      "visits": [
+        {
+          "day": -90,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Vitamin D 1000 IU",
+              "dosage": "1 tablet",
+              "instruction": "Take with breakfast.",
+              "day": -90,
+              "frequency": "Once daily",
+              "duration": "30 days",
+              "status": "Completed"
+            }
+          ],
+          "title": "Initial Consultation",
+          "note": "Patient presented with headaches and fatigue.",
+          "diagnosis": "Fatigue",
+          "treatment": "Improved sleep schedule and hydration recommended.",
+          "diagnosisStatus": "Resolved"
+        },
+        {
+          "day": -24,
+          "doctorSlug": "sarah-johnson",
+          "prescriptions": [],
+          "title": "Cardiology Check-up",
+          "note": "Routine heart check-up. Blood pressure slightly elevated.",
+          "diagnosis": "Elevated Blood Pressure",
+          "treatment": "Monitor blood pressure at home and review in clinic.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Recheck blood pressure at the next cardiology visit."
+        },
+        {
+          "day": -16,
+          "doctorSlug": "michael-smith",
+          "prescriptions": [
+            {
+              "medication": "Paracetamol 500mg",
+              "dosage": "1 tablet",
+              "instruction": "Take with water after food.",
+              "day": -16,
+              "frequency": "Every 6 hours when needed",
+              "duration": "5 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Follow-up Consultation",
+          "note": "Follow-up for recurring headaches. Symptoms are improving.",
+          "diagnosis": "Tension Headache",
+          "treatment": "Mild recurring headaches. No serious symptoms reported.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Maintain regular sleep and hydration. Return if headaches continue."
+        }
+      ],
+      "vitals": {
+        "heartRate": "76",
+        "bloodPressure": "132/84",
+        "temperature": "36.7",
+        "oxygen": "98",
+        "weight": "78",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "isabella.white@example.com",
+      "visits": [
+        {
+          "day": -14,
+          "doctorSlug": "sarah-johnson",
+          "prescriptions": [
+            {
+              "medication": "Amlodipine 5mg",
+              "dosage": "1 tablet",
+              "instruction": "Take in the morning. Monitor blood pressure weekly.",
+              "day": -14,
+              "frequency": "Once daily",
+              "duration": "90 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Cardiology Consultation",
+          "note": "Patient reported chest discomfort during exercise.",
+          "diagnosis": "Stage 1 Hypertension",
+          "treatment": "Elevated readings on three visits. Medication started.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Reduce salt intake. Review readings at the follow-up."
+        }
+      ],
+      "vitals": {
+        "heartRate": "78",
+        "bloodPressure": "134/86",
+        "temperature": "36.6",
+        "oxygen": "97",
+        "weight": "68",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    },
+    {
+      "patientEmail": "william.harris@example.com",
+      "visits": [
+        {
+          "day": -11,
+          "doctorSlug": "james-anderson",
+          "prescriptions": [
+            {
+              "medication": "Naproxen 250mg",
+              "dosage": "1 tablet",
+              "instruction": "Take with food. Stop if stomach pain occurs.",
+              "day": -11,
+              "frequency": "Twice daily",
+              "duration": "10 days",
+              "status": "Active"
+            }
+          ],
+          "title": "Orthopedic Review",
+          "note": "Lower back pain reviewed after physiotherapy.",
+          "diagnosis": "Lumbar Muscle Strain",
+          "treatment": "No neurological symptoms. Physiotherapy continued.",
+          "diagnosisStatus": "Active",
+          "doctorNote": "Mobility improved. Continue home exercises for another month."
+        }
+      ],
+      "vitals": {
+        "heartRate": "70",
+        "bloodPressure": "122/79",
+        "temperature": "36.8",
+        "oxygen": "98",
+        "weight": "82",
+        "recordedAt": "2026-10-16",
+        "day": -1
+      }
+    }
+  ],
+  "labTests": [
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "sarah-johnson",
+      "name": "Lipid panel",
+      "description": "Cholesterol and triglycerides",
+      "day": -24,
+      "result": "LDL 3.1 mmol/L (borderline high)",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "sarah-johnson",
+      "name": "ECG",
+      "description": "Resting 12-lead ECG",
+      "day": -24,
+      "result": "Normal sinus rhythm",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "michael-smith",
+      "name": "Complete blood count",
+      "description": "Fatigue work-up",
+      "day": -90,
+      "result": "Within normal limits",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "emily.johnson@example.com",
+      "doctorSlug": "sarah-johnson",
+      "name": "Holter monitor",
+      "description": "24-hour ECG recording",
+      "day": -13,
+      "result": null,
+      "status": "In Progress"
+    },
+    {
+      "patientEmail": "sarah.wilson@example.com",
+      "doctorSlug": "michael-smith",
+      "name": "Chest X-ray",
+      "description": "Persistent cough",
+      "day": -12,
+      "result": "Clear lung fields",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "michael.brown@example.com",
+      "doctorSlug": "james-anderson",
+      "name": "Lumbar spine X-ray",
+      "description": "Lower back pain",
+      "day": -11,
+      "result": "No fracture or disc narrowing",
+      "status": "Completed"
+    },
+    {
+      "patientEmail": "robert.anderson@example.com",
+      "doctorSlug": "anna-martin",
+      "name": "Nerve conduction study",
+      "description": "Numbness in hands",
+      "day": 5,
+      "result": null,
+      "status": "Requested"
+    }
+  ],
+  "feedback": [
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "sarah-johnson",
+      "department": "Cardiology",
+      "type": "Suggestion",
+      "subject": "Appointment reminders",
+      "message": "It would be useful to receive appointment reminders one day before the appointment.",
+      "rating": 4,
+      "priority": "Low",
+      "status": "Resolved",
+      "submittedDay": -20,
+      "response": "Thank you for your suggestion. We are reviewing improvements to the notification system.",
+      "respondedDay": -18,
+      "responderEmail": "admin@test.com"
+    },
+    {
+      "patientEmail": "sophia.thomas@example.com",
+      "doctorSlug": "anna-martin",
+      "department": "Neurology",
+      "type": "Feedback",
+      "subject": "Helpful neurology consultation",
+      "message": "Dr. Martin took time to answer all my questions.",
+      "rating": 4,
+      "priority": "Low",
+      "status": "Resolved",
+      "submittedDay": -11,
+      "response": "We are glad the consultation was helpful.",
+      "respondedDay": -10,
+      "responderEmail": "elif.demir@healthcare.test"
+    },
+    {
+      "patientEmail": "olivia.martin@example.com",
+      "doctorSlug": null,
+      "department": "Reception",
+      "type": "Complaint",
+      "subject": "Rude reception staff",
+      "message": "The reception staff were dismissive when I asked about my appointment time.",
+      "rating": 1,
+      "priority": "High",
+      "status": "In Review",
+      "submittedDay": -8,
+      "response": null,
+      "respondedDay": null,
+      "responderEmail": null
+    },
+    {
+      "patientEmail": "emma.davis@example.com",
+      "doctorSlug": "emily-brown",
+      "department": "Dermatology",
+      "type": "Feedback",
+      "subject": "Easy online booking",
+      "message": "Booking an appointment online was quick and simple.",
+      "rating": 5,
+      "priority": "Low",
+      "status": "Closed",
+      "submittedDay": -6,
+      "response": "Thank you for using the online booking system.",
+      "respondedDay": -5,
+      "responderEmail": "admin@test.com"
+    },
+    {
+      "patientEmail": "david.miller@example.com",
+      "doctorSlug": "david-wilson",
+      "department": "General Medicine",
+      "type": "Complaint",
+      "subject": "Prescription not visible",
+      "message": "My latest prescription did not appear in my medical records for two days.",
+      "rating": 3,
+      "priority": "Medium",
+      "status": "Open",
+      "submittedDay": -4,
+      "response": null,
+      "respondedDay": null,
+      "responderEmail": null
+    },
+    {
+      "patientEmail": "sarah.wilson@example.com",
+      "doctorSlug": null,
+      "department": null,
+      "type": "Suggestion",
+      "subject": "SMS appointment reminders",
+      "message": "It would help to receive a text message reminder the day before an appointment.",
+      "rating": 4,
+      "priority": "Medium",
+      "status": "In Review",
+      "submittedDay": -3,
+      "response": null,
+      "respondedDay": null,
+      "responderEmail": null
+    },
+    {
+      "patientEmail": "emily.johnson@example.com",
+      "doctorSlug": "sarah-johnson",
+      "department": "Cardiology",
+      "type": "Feedback",
+      "subject": "Great cardiology care",
+      "message": "Dr. Johnson explained everything clearly and the follow-up was well organised.",
+      "rating": 5,
+      "priority": "Low",
+      "status": "Resolved",
+      "submittedDay": -2,
+      "response": "Thank you for your kind words. We have shared your feedback with the cardiology team.",
+      "respondedDay": -1,
+      "responderEmail": "elif.demir@healthcare.test"
+    },
+    {
+      "patientEmail": "patient@test.com",
+      "doctorSlug": "michael-smith",
+      "department": "General Medicine",
+      "type": "Complaint",
+      "subject": "Long waiting time",
+      "message": "I waited more than 45 minutes after my appointment time before being seen by the doctor.",
+      "rating": 2,
+      "priority": "High",
+      "status": "Open",
+      "submittedDay": -1,
+      "response": null,
+      "respondedDay": null,
+      "responderEmail": null
+    }
+  ],
+  "applications": [
+    {
+      "name": "Dr. Hannah Lee",
+      "email": "hannah.lee@example.com",
+      "phone": "+90 555 310 1001",
+      "role": "doctor",
+      "department": "Pediatrics",
+      "licenseNumber": "MD-TR-448120",
+      "experience": 8,
+      "qualification": "MD, Pediatrics Residency — Ankara University",
+      "documents": [
+        "Medical license.pdf",
+        "CV.pdf",
+        "ID card.pdf"
+      ],
+      "submittedDay": -1,
+      "status": "Pending",
+      "reviewedDay": null,
+      "reviewerEmail": null,
+      "reviewNote": null
+    },
+    {
+      "name": "Dr. Omar Haddad",
+      "email": "omar.haddad@example.com",
+      "phone": "+90 555 310 1002",
+      "role": "doctor",
+      "department": "Neurology",
+      "licenseNumber": "MD-TR-551903",
+      "experience": 12,
+      "qualification": "MD, PhD Neurology — Hacettepe University",
+      "documents": [
+        "Medical license.pdf",
+        "CV.pdf"
+      ],
+      "submittedDay": -2,
+      "status": "Pending",
+      "reviewedDay": null,
+      "reviewerEmail": null,
+      "reviewNote": null
+    },
+    {
+      "name": "Grace Okafor",
+      "email": "grace.okafor@example.com",
+      "phone": "+90 555 310 1003",
+      "role": "medical_staff",
+      "department": "Emergency",
+      "licenseNumber": "RN-TR-220781",
+      "experience": 5,
+      "qualification": "BSc Nursing — Istanbul University",
+      "documents": [
+        "Nursing license.pdf",
+        "CV.pdf",
+        "References.pdf"
+      ],
+      "submittedDay": -3,
+      "status": "Pending",
+      "reviewedDay": null,
+      "reviewerEmail": null,
+      "reviewNote": null
+    },
+    {
+      "name": "Dr. Lucas Meyer",
+      "email": "lucas.meyer@example.com",
+      "phone": "+90 555 310 1004",
+      "role": "doctor",
+      "department": "Dermatology",
+      "licenseNumber": "MD-TR-390456",
+      "experience": 3,
+      "qualification": "MD — Ege University",
+      "documents": [
+        "CV.pdf"
+      ],
+      "submittedDay": -5,
+      "status": "Pending",
+      "reviewedDay": null,
+      "reviewerEmail": null,
+      "reviewNote": null
+    },
+    {
+      "name": "Selin Arslan",
+      "email": "selin.arslan@example.com",
+      "phone": "+90 555 310 1005",
+      "role": "medical_staff",
+      "department": "Radiology",
+      "licenseNumber": "RT-TR-118230",
+      "experience": 6,
+      "qualification": "Radiologic Technology Diploma",
+      "documents": [
+        "Certification.pdf",
+        "CV.pdf"
+      ],
+      "submittedDay": -8,
+      "status": "Approved",
+      "reviewedDay": -6,
+      "reviewerEmail": "elif.demir@healthcare.test",
+      "reviewNote": "All documents verified."
+    },
+    {
+      "name": "Dr. Victor Novak",
+      "email": "victor.novak@example.com",
+      "phone": "+90 555 310 1006",
+      "role": "doctor",
+      "department": "Orthopedics",
+      "licenseNumber": "MD-TR-207733",
+      "experience": 15,
+      "qualification": "MD, Orthopedic Surgery — Gazi University",
+      "documents": [
+        "Medical license.pdf",
+        "CV.pdf",
+        "ID card.pdf"
+      ],
+      "submittedDay": -12,
+      "status": "Approved",
+      "reviewedDay": -10,
+      "reviewerEmail": "admin@test.com",
+      "reviewNote": "License confirmed with the medical board."
+    },
+    {
+      "name": "Kevin Brooks",
+      "email": "kevin.brooks@example.com",
+      "phone": "+90 555 310 1007",
+      "role": "medical_staff",
+      "department": "General Medicine",
+      "licenseNumber": null,
+      "experience": 1,
+      "qualification": "Nursing student (final year)",
+      "documents": [
+        "CV.pdf"
+      ],
+      "submittedDay": -16,
+      "status": "Rejected",
+      "reviewedDay": -14,
+      "reviewerEmail": "admin@test.com",
+      "reviewNote": "A valid nursing license is required. The applicant may reapply after licensing."
+    }
+  ],
+  "activity": [
+    {
+      "userEmail": "admin@test.com",
+      "user": "Test Administrator",
+      "role": "admin",
+      "action": "Rejected application APP-1007",
+      "module": "Applications",
+      "status": "Success",
+      "ip": "10.0.1.4",
+      "day": -14,
+      "time": "09:45"
+    },
+    {
+      "userEmail": "admin@test.com",
+      "user": "Test Administrator",
+      "role": "admin",
+      "action": "Approved application APP-1006",
+      "module": "Applications",
+      "status": "Success",
+      "ip": "10.0.1.4",
+      "day": -10,
+      "time": "10:00"
+    },
+    {
+      "userEmail": "isabella.white@example.com",
+      "user": "Isabella White",
+      "role": "patient",
+      "action": "Password reset requested",
+      "module": "Authentication",
+      "status": "Warning",
+      "ip": "95.70.150.2",
+      "day": -5,
+      "time": "20:11"
+    },
+    {
+      "userEmail": "james.anderson@healthcare.test",
+      "user": "Dr. James Anderson",
+      "role": "doctor",
+      "action": "Prescribed medication for patient #3",
+      "module": "Medical Records",
+      "status": "Success",
+      "ip": "10.0.4.40",
+      "day": -11,
+      "time": "14:22"
+    },
+    {
+      "userEmail": "sarah.wilson@example.com",
+      "user": "Sarah Wilson",
+      "role": "patient",
+      "action": "Updated profile information",
+      "module": "Users",
+      "status": "Success",
+      "ip": "176.88.3.14",
+      "day": -4,
+      "time": "12:05"
+    },
+    {
+      "userEmail": "elif.demir@healthcare.test",
+      "user": "Elif Demir",
+      "role": "admin",
+      "action": "Responded to feedback FB-2002",
+      "module": "Feedback",
+      "status": "Success",
+      "ip": "10.0.1.5",
+      "day": -1,
+      "time": "09:30"
+    },
+    {
+      "userEmail": "emily.brown@healthcare.test",
+      "user": "Dr. Emily Brown",
+      "role": "doctor",
+      "action": "Updated weekly availability",
+      "module": "Appointments",
+      "status": "Success",
+      "ip": "10.0.4.27",
+      "day": -3,
+      "time": "18:40"
+    },
+    {
+      "userEmail": null,
+      "user": "Unknown",
+      "role": null,
+      "action": "Failed login attempt for john.smith@example.com",
+      "module": "Authentication",
+      "status": "Failed",
+      "ip": "198.51.100.23",
+      "day": -3,
+      "time": "03:08"
+    },
+    {
+      "userEmail": "william.harris@example.com",
+      "user": "William Harris",
+      "role": "patient",
+      "action": "Cancelled an appointment with Dr. Sarah Johnson",
+      "module": "Appointments",
+      "status": "Warning",
+      "ip": "88.240.7.71",
+      "day": -2,
+      "time": "11:15"
+    },
+    {
+      "userEmail": "staff@test.com",
+      "user": "Nurse Laura Kim",
+      "role": "medical_staff",
+      "action": "Updated vital signs for patient #2",
+      "module": "Medical Records",
+      "status": "Success",
+      "ip": "10.0.4.50",
+      "day": -2,
+      "time": "12:47"
+    },
+    {
+      "userEmail": "emily.johnson@example.com",
+      "user": "Emily Johnson",
+      "role": "patient",
+      "action": "Submitted feedback FB-2002",
+      "module": "Feedback",
+      "status": "Success",
+      "ip": "78.180.12.9",
+      "day": -2,
+      "time": "14:02"
+    },
+    {
+      "userEmail": "elif.demir@healthcare.test",
+      "user": "Elif Demir",
+      "role": "admin",
+      "action": "Updated system notification settings",
+      "module": "Settings",
+      "status": "Success",
+      "ip": "10.0.1.5",
+      "day": -1,
+      "time": "15:20"
+    },
+    {
+      "userEmail": "michael.smith@healthcare.test",
+      "user": "Dr. Michael Smith",
+      "role": "doctor",
+      "action": "Added diagnosis for patient #4",
+      "module": "Medical Records",
+      "status": "Success",
+      "ip": "10.0.4.33",
+      "day": -1,
+      "time": "16:30"
+    },
+    {
+      "userEmail": null,
+      "user": "Unknown",
+      "role": null,
+      "action": "Failed login attempt for admin@test.com",
+      "module": "Authentication",
+      "status": "Failed",
+      "ip": "203.0.113.45",
+      "day": 0,
+      "time": "07:41"
+    },
+    {
+      "userEmail": "patient@test.com",
+      "user": "John Smith",
+      "role": "patient",
+      "action": "Booked appointment with Dr. Emily Brown",
+      "module": "Appointments",
+      "status": "Success",
+      "ip": "85.102.44.10",
+      "day": 0,
+      "time": "07:55"
+    },
+    {
+      "userEmail": "doctor@test.com",
+      "user": "Dr. Sarah Johnson",
+      "role": "doctor",
+      "action": "Logged in",
+      "module": "Authentication",
+      "status": "Success",
+      "ip": "10.0.4.21",
+      "day": 0,
+      "time": "08:12"
+    }
+  ]
+}
