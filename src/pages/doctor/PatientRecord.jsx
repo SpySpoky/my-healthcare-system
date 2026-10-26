@@ -6,7 +6,14 @@ import { useAuth } from "../../context/useAuth";
 import { useToast } from "../../context/useToast";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
 import { logActivity } from "../../data/adminData";
-import { addClinicalEntry, getPatientRecord } from "../../data/clinicalData";
+import Modal from "../../components/common/Modal";
+import Button from "../../components/forms/Button";
+import Input from "../../components/forms/Input";
+import {
+  addClinicalEntry,
+  getPatientRecord,
+  recordVitals,
+} from "../../data/clinicalData";
 import { getDoctorByEmail } from "../../data/doctorsData";
 import { getPatientById } from "../../data/patientsData";
 import { formatDate, getTodayDate } from "../../utils/date";
@@ -62,9 +69,16 @@ function PatientRecord({ patient, view }) {
     medicalHistory,
     appointments,
     notes,
-    monitoringReadings,
-    monitoringHistory,
   } = initialRecord;
+
+  // Vital signs change while the page is open (doctors and nurses
+  // record them here), so they are kept in state.
+  const [monitoring, setMonitoring] = useState({
+    readings: initialRecord.monitoringReadings,
+    history: initialRecord.monitoringHistory,
+  });
+
+  const { readings: monitoringReadings, history: monitoringHistory } = monitoring;
 
   // Newest recording first; a patient may have none yet.
   const latestMeasurement = monitoringHistory[0] ?? null;
@@ -84,6 +98,110 @@ function PatientRecord({ patient, view }) {
   /* =====================================================
      FORMS
   ===================================================== */
+
+  /* ---------- vital signs ---------- */
+
+  // Doctors and medical staff (nurses) record readings here; this is
+  // how a patient's status is monitored.
+  const BLANK_VITALS = {
+    heartRate: "",
+    bloodPressure: "",
+    temperature: "",
+    oxygen: "",
+    weight: "",
+    date: "",
+  };
+
+  const [isRecordingVitals, setIsRecordingVitals] = useState(false);
+  const [vitalsForm, setVitalsForm] = useState(BLANK_VITALS);
+  const [vitalsErrors, setVitalsErrors] = useState({});
+
+  const openVitalsModal = () => {
+    setVitalsForm({ ...BLANK_VITALS, date: getTodayDate() });
+    setVitalsErrors({});
+    setIsRecordingVitals(true);
+  };
+
+  const handleVitalsChange = (event) => {
+    const { name, value } = event.target;
+
+    setVitalsForm((previous) => ({ ...previous, [name]: value }));
+
+    if (vitalsErrors[name]) {
+      setVitalsErrors((previous) => ({ ...previous, [name]: "" }));
+    }
+  };
+
+  // Ranges match the CHECK constraints on vital_signs.
+  const VITAL_RANGES = {
+    heartRate: [20, 250, t("Heart rate must be between 20 and 250 bpm.")],
+    temperature: [30, 45, t("Temperature must be between 30 and 45 °C.")],
+    oxygen: [50, 100, t("Oxygen saturation must be between 50 and 100%.")],
+    weight: [1, 500, t("Weight must be between 1 and 500 kg.")],
+  };
+
+  const validateVitals = () => {
+    const errors = {};
+
+    Object.entries(VITAL_RANGES).forEach(([field, [min, max, message]]) => {
+      const value = vitalsForm[field].trim();
+
+      if (value && (Number.isNaN(Number(value)) || Number(value) < min || Number(value) > max)) {
+        errors[field] = message;
+      }
+    });
+
+    if (vitalsForm.bloodPressure.trim() && !/^\d{2,3}\/\d{2,3}$/.test(vitalsForm.bloodPressure.trim())) {
+      errors.bloodPressure = t("Blood pressure must look like 120/80.");
+    }
+
+    if (!vitalsForm.date) {
+      errors.date = t("Select a date.");
+    } else if (vitalsForm.date > getTodayDate()) {
+      errors.date = t("The date cannot be in the future.");
+    }
+
+    const hasReading = ["heartRate", "bloodPressure", "temperature", "oxygen", "weight"].some(
+      (field) => vitalsForm[field].trim()
+    );
+
+    if (!hasReading) {
+      errors.heartRate = t("Enter at least one reading.");
+    }
+
+    setVitalsErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleVitalsSubmit = (event) => {
+    event.preventDefault();
+
+    if (!validateVitals()) {
+      return;
+    }
+
+    recordVitals(patient.id, {
+      heartRate: vitalsForm.heartRate.trim(),
+      bloodPressure: vitalsForm.bloodPressure.trim(),
+      temperature: vitalsForm.temperature.trim(),
+      oxygen: vitalsForm.oxygen.trim(),
+      weight: vitalsForm.weight.trim(),
+      recordedAt: vitalsForm.date,
+      recordedBy: author.doctor,
+    });
+
+    const updated = getPatientRecord(patient.id);
+
+    setMonitoring({
+      readings: updated.monitoringReadings,
+      history: updated.monitoringHistory,
+    });
+
+    logActivity(user, `Recorded vital signs for ${patient.name}`, "Medical Records");
+    showToast(t("Vital signs were recorded."));
+    setIsRecordingVitals(false);
+  };
 
   const [diagnosisForm, setDiagnosisForm] = useState({
     diagnosis: "",
@@ -1111,25 +1229,32 @@ function PatientRecord({ patient, view }) {
 
               </div>
 
-              <div
-                className={`inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-xs font-black ${
-                  needsMonitoring
-                    ? "border-amber-200 bg-amber-50 text-amber-700"
-                    : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                }`}
-              >
+              <div className="flex flex-wrap items-center gap-3">
 
-                <span
-                  className={`h-2 w-2 animate-pulse rounded-full ${
+                <div
+                  className={`inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-xs font-black ${
                     needsMonitoring
-                      ? "bg-amber-500"
-                      : "bg-emerald-500"
+                      ? "border-amber-200 bg-amber-50 text-amber-700"
+                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
                   }`}
-                />
+                >
 
-                {needsMonitoring
-                  ? t("Needs Monitoring")
-                  : t("Patient Stable")}
+                  <span
+                    className={`h-2 w-2 animate-pulse rounded-full ${
+                      needsMonitoring
+                        ? "bg-amber-500"
+                        : "bg-emerald-500"
+                    }`}
+                  />
+
+                  {needsMonitoring
+                    ? t("Needs Monitoring")
+                    : t("Patient Stable")}
+
+                </div>
+
+                {/* Doctors and nurses both record readings here. */}
+                <Button onClick={openVitalsModal}>{t("Record Vitals")}</Button>
 
               </div>
 
@@ -1543,6 +1668,111 @@ function PatientRecord({ patient, view }) {
       {/* =====================================================
           ADD DIAGNOSIS MODAL
       ===================================================== */}
+
+      {/* RECORD VITAL SIGNS */}
+
+      <Modal
+        title={t("Record Vital Signs")}
+        isOpen={isRecordingVitals}
+        onClose={() => setIsRecordingVitals(false)}
+      >
+        <form onSubmit={handleVitalsSubmit} noValidate>
+          <p className="mb-4 text-sm leading-6 text-slate-500">{t("Enter the readings you measured. Leave a field empty if you did not measure it.")}</p>
+
+          <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+            <div>
+              <Input
+                label={t("Heart rate (bpm)")}
+                name="heartRate"
+                type="number"
+                min="20"
+                max="250"
+                placeholder="76"
+                value={vitalsForm.heartRate}
+                onChange={handleVitalsChange}
+                error={vitalsErrors.heartRate}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={t("Blood pressure (mmHg)")}
+                name="bloodPressure"
+                placeholder="120/80"
+                value={vitalsForm.bloodPressure}
+                onChange={handleVitalsChange}
+                error={vitalsErrors.bloodPressure}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={t("Temperature (°C)")}
+                name="temperature"
+                type="number"
+                step="0.1"
+                min="30"
+                max="45"
+                placeholder="36.7"
+                value={vitalsForm.temperature}
+                onChange={handleVitalsChange}
+                error={vitalsErrors.temperature}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={t("Oxygen saturation (%)")}
+                name="oxygen"
+                type="number"
+                min="50"
+                max="100"
+                placeholder="98"
+                value={vitalsForm.oxygen}
+                onChange={handleVitalsChange}
+                error={vitalsErrors.oxygen}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={t("Weight (kg)")}
+                name="weight"
+                type="number"
+                step="0.1"
+                min="1"
+                max="500"
+                placeholder="72"
+                value={vitalsForm.weight}
+                onChange={handleVitalsChange}
+                error={vitalsErrors.weight}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={t("Date measured")}
+                name="date"
+                type="date"
+                max={getTodayDate()}
+                value={vitalsForm.date}
+                onChange={handleVitalsChange}
+                required
+                error={vitalsErrors.date}
+              />
+            </div>
+          </div>
+
+          <div className="mt-2 flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsRecordingVitals(false)}
+            >{t("Cancel")}</Button>
+
+            <Button type="submit">{t("Save Readings")}</Button>
+          </div>
+        </form>
+      </Modal>
 
       {showDiagnosisModal && (
 

@@ -281,6 +281,7 @@ CREATE TABLE vital_signs (
     vital_id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
     patient_id      INT UNSIGNED NOT NULL,
     recorded_at     DATE         NOT NULL DEFAULT (CURRENT_DATE),
+    recorded_by     INT UNSIGNED,                  -- the doctor or nurse who took the reading
     heart_rate      SMALLINT,
     blood_pressure  VARCHAR(7),
     temperature     DECIMAL(4,1),
@@ -291,6 +292,8 @@ CREATE TABLE vital_signs (
     KEY idx_vitals_patient (patient_id, recorded_at),
     CONSTRAINT fk_vitals_patient FOREIGN KEY (patient_id)
         REFERENCES patient (user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_vitals_staff FOREIGN KEY (recorded_by)
+        REFERENCES staff (user_id) ON DELETE SET NULL,
     CONSTRAINT chk_vitals_hr CHECK (heart_rate IS NULL OR heart_rate BETWEEN 20 AND 250),
     CONSTRAINT chk_vitals_temp CHECK (temperature IS NULL OR temperature BETWEEN 30 AND 45),
     CONSTRAINT chk_vitals_o2 CHECK (oxygen IS NULL OR oxygen BETWEEN 50 AND 100)
@@ -342,7 +345,6 @@ CREATE TABLE staff_application (
     license_number    VARCHAR(50),
     experience_years  SMALLINT,
     qualification     VARCHAR(255),
-    documents         JSON         NOT NULL,
     submitted_at      DATE         NOT NULL DEFAULT (CURRENT_DATE),
     status            VARCHAR(10)  NOT NULL DEFAULT 'Pending',
     reviewed_at       DATE,
@@ -358,6 +360,30 @@ CREATE TABLE staff_application (
     CONSTRAINT chk_application_role CHECK (role IN ('doctor', 'medical_staff')),
     CONSTRAINT chk_application_status CHECK (status IN ('Pending', 'Approved', 'Rejected'))
 ) ENGINE=InnoDB AUTO_INCREMENT=1001;
+
+-- =====================================================
+-- APPLICATION_DOCUMENT (weak entity, identified by STAFF_APPLICATION)
+-- Key: (application_id, document_no)
+-- The licence, CV and other files an applicant uploads. `content`
+-- holds the file itself so every copy of the desktop app sees the
+-- same documents through the shared MySQL server; it is NULL for
+-- documents that were only ever recorded by name (the demo data).
+-- =====================================================
+
+CREATE TABLE application_document (
+    application_id  INT UNSIGNED  NOT NULL,
+    document_no     INT UNSIGNED  NOT NULL,
+    file_name       VARCHAR(255)  NOT NULL,
+    mime_type       VARCHAR(100)  NOT NULL DEFAULT 'application/pdf',
+    byte_size       INT UNSIGNED  NOT NULL DEFAULT 0,
+    content         LONGBLOB,
+    uploaded_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (application_id, document_no),
+    CONSTRAINT fk_appdoc_application FOREIGN KEY (application_id)
+        REFERENCES staff_application (application_id) ON DELETE CASCADE,
+    CONSTRAINT chk_appdoc_type CHECK (mime_type IN ('application/pdf', 'image/jpeg', 'image/png'))
+) ENGINE=InnoDB;
 
 -- System activity / audit log. Shown as "ACT-<id>".
 CREATE TABLE activity_log (
@@ -381,17 +407,24 @@ CREATE TABLE activity_log (
     CONSTRAINT chk_activity_status CHECK (status IN ('Success', 'Warning', 'Failed'))
 ) ENGINE=InnoDB;
 
--- Metadata of documents a patient uploads on their profile.
+-- Documents a patient uploads on their profile (lab results, referrals,
+-- insurance papers). `content` holds the file itself, like
+-- APPLICATION_DOCUMENT; only the patient and an administrator may read it.
 CREATE TABLE patient_document (
     document_id  INT UNSIGNED NOT NULL AUTO_INCREMENT,
     patient_id   INT UNSIGNED NOT NULL,
-    data         JSON         NOT NULL,       -- the document object the app shows
+    doc_type     VARCHAR(40)  NOT NULL,       -- "Lab Result", "Prescription", ...
+    file_name    VARCHAR(255) NOT NULL,
+    mime_type    VARCHAR(100) NOT NULL DEFAULT 'application/pdf',
+    byte_size    INT UNSIGNED NOT NULL DEFAULT 0,
+    content      LONGBLOB,
     created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (document_id),
     KEY idx_document_patient (patient_id),
     CONSTRAINT fk_document_patient FOREIGN KEY (patient_id)
-        REFERENCES patient (user_id) ON DELETE CASCADE
+        REFERENCES patient (user_id) ON DELETE CASCADE,
+    CONSTRAINT chk_document_mime CHECK (mime_type IN ('application/pdf', 'image/jpeg', 'image/png'))
 ) ENGINE=InnoDB;
 
 -- Password reset requests (token is stored hashed).

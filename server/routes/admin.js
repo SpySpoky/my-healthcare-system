@@ -3,6 +3,7 @@
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { Router } from "express";
+import { receiveDocument, receiveDocuments } from "../uploads.js";
 import { ACTIVITY_MODULES, ACTIVITY_STATUSES, logActivity } from "../activity.js";
 import { requireAuth, requireRole } from "../auth.js";
 import {
@@ -198,9 +199,13 @@ const slugify = (name) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-// Anyone can apply; administrators review the requests.
+const MAX_DOCUMENTS = 5;
+
+// Anyone can apply; administrators review the requests. The form is
+// sent as multipart/form-data so the documents travel with it.
 applicationsRouter.post(
   "/",
+  receiveDocuments("documents", MAX_DOCUMENTS),
   route(async (req, res) => {
     const body = req.body || {};
     const email = text(body.email, { field: "Email", required: true }).toLowerCase();
@@ -209,7 +214,10 @@ applicationsRouter.post(
 
     const name = text(body.name, { field: "Name", required: true, max: 100 });
     const role = oneOf(body.role, ["doctor", "medical_staff"], "Role");
-    const documents = Array.isArray(body.documents) ? body.documents.slice(0, 10).map((d) => String(d).slice(0, 150)) : [];
+    const files = req.files || [];
+
+    if (!files.length) throw badRequest("Attach at least one supporting document.");
+
     const password = body.password ? await bcrypt.hash(String(body.password), 10) : null;
 
     if (await queryOne("SELECT 1 AS ok FROM users WHERE email = ?", [email])) {
@@ -225,23 +233,40 @@ applicationsRouter.post(
       ? await queryOne("SELECT dept_id FROM department WHERE dept_name = ?", [department])
       : null;
 
-    await query(
-      `INSERT INTO staff_application
-         (full_name, email, password, phone, role, dept_id, license_number, experience_years, qualification, documents)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        name,
-        email,
-        password,
-        text(body.phone, { field: "Phone", max: 30 }),
-        role,
-        dept?.dept_id ?? null,
-        text(body.licenseNumber, { field: "License number", max: 50 }),
-        Math.max(0, Number(body.experience) || 0),
-        text(body.qualification, { field: "Qualification", max: 255 }),
-        JSON.stringify(documents),
-      ]
-    );
+    await withTransaction(async (tx) => {
+      const { insertId } = await tx.query(
+        `INSERT INTO staff_application
+           (full_name, email, password, phone, role, dept_id, license_number, experience_years, qualification)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          name,
+          email,
+          password,
+          text(body.phone, { field: "Phone", max: 30 }),
+          role,
+          dept?.dept_id ?? null,
+          text(body.licenseNumber, { field: "License number", max: 50 }),
+          Math.max(0, Number(body.experience) || 0),
+          text(body.qualification, { field: "Qualification", max: 255 }),
+        ]
+      );
+
+      for (const [index, file] of files.entries()) {
+        await tx.query(
+          `INSERT INTO application_document
+             (application_id, document_no, file_name, mime_type, byte_size, content)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            insertId,
+            index + 1,
+            String(file.originalname).slice(0, 255),
+            file.mimetype,
+            file.size,
+            file.buffer,
+          ]
+        );
+      }
+    });
 
     res.status(201).json({ message: "Your application was submitted for review." });
   })
@@ -253,6 +278,32 @@ applicationsRouter.get(
   requireRole("admin"),
   route(async (_req, res) => {
     res.json({ applications: await loadApplications() });
+  })
+);
+
+// Streams one uploaded document to the reviewing administrator.
+applicationsRouter.get(
+  "/:id/documents/:documentNo",
+  requireAuth,
+  requireRole("admin"),
+  route(async (req, res) => {
+    const id = parseRef(req.params.id);
+    const documentNo = intId(req.params.documentNo, "Document");
+    const document = await queryOne(
+      `SELECT file_name, mime_type, content FROM application_document
+       WHERE application_id = ? AND document_no = ?`,
+      [id, documentNo]
+    );
+
+    if (!document || !document.content) throw notFound("Document not found.");
+
+    // The name is quoted so a comma or quote in it cannot break the header.
+    const safeName = document.file_name.replace(/["\\]/g, "");
+
+    res.setHeader("Content-Type", document.mime_type);
+    res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+    res.setHeader("Content-Length", document.content.length);
+    res.send(document.content);
   })
 );
 
@@ -373,37 +424,110 @@ activityRouter.get(
 
 documentsRouter.use(requireAuth);
 
-documentsRouter.put(
+// Same list as the Document Type menu on the patient's profile page.
+const DOCUMENT_CATEGORIES = [
+  "Passport",
+  "National ID",
+  "Medical Record",
+  "Prescription",
+  "Lab Result",
+  "Insurance",
+  "Vaccination Record",
+  "Other",
+];
+
+const MAX_PATIENT_DOCUMENTS = 50;
+
+// A patient keeps their own documents; an administrator may also manage them.
+const assertOwnsDocuments = (req, patientId) => {
+  if (!(req.user.role === "admin" || (req.user.role === "patient" && req.user.id === patientId))) {
+    throw forbidden();
+  }
+};
+
+const documentsFor = async (patientId) => (await loadDocuments({ patientId }))[patientId] || [];
+
+documentsRouter.post(
   "/:id/documents",
+  receiveDocument("document"),
   route(async (req, res) => {
     const patientId = intId(req.params.id, "Patient");
 
-    if (!(req.user.role === "admin" || (req.user.role === "patient" && req.user.id === patientId))) {
-      throw forbidden();
+    assertOwnsDocuments(req, patientId);
+
+    const file = req.file;
+
+    if (!file) throw badRequest("Choose a file to upload.");
+    if (!file.size) throw badRequest("The selected file is empty. Please choose another file.");
+
+    const category = oneOf(req.body?.type, DOCUMENT_CATEGORIES, "Document type");
+    const name = String(file.originalname).slice(0, 255);
+
+    const { count } = (await queryOne(
+      "SELECT COUNT(*) AS count FROM patient_document WHERE patient_id = ?",
+      [patientId]
+    )) || { count: 0 };
+
+    if (count >= MAX_PATIENT_DOCUMENTS) {
+      throw badRequest(`You can keep at most ${MAX_PATIENT_DOCUMENTS} documents.`);
     }
 
-    const documents = req.body?.documents;
-
-    if (!Array.isArray(documents) || documents.length > 50) {
-      throw badRequest("documents must be a list of at most 50 items.");
+    if (await queryOne(
+      "SELECT 1 AS ok FROM patient_document WHERE patient_id = ? AND file_name = ?",
+      [patientId, name]
+    )) {
+      throw conflict("A document with this file name has already been uploaded.");
     }
 
-    const rows = documents.map((document) => {
-      const json = JSON.stringify(document);
+    await query(
+      `INSERT INTO patient_document (patient_id, doc_type, file_name, mime_type, byte_size, content)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [patientId, category, name, file.mimetype, file.size, file.buffer]
+    );
 
-      if (json.length > 4000) throw badRequest("A document entry is too large.");
+    res.status(201).json({ documents: await documentsFor(patientId) });
+  })
+);
 
-      return json;
-    });
+documentsRouter.get(
+  "/:id/documents/:documentId",
+  route(async (req, res) => {
+    const patientId = intId(req.params.id, "Patient");
 
-    await withTransaction(async (tx) => {
-      await tx.query("DELETE FROM patient_document WHERE patient_id = ?", [patientId]);
+    assertOwnsDocuments(req, patientId);
 
-      for (const json of rows) {
-        await tx.query("INSERT INTO patient_document (patient_id, data) VALUES (?, ?)", [patientId, json]);
-      }
-    });
+    const document = await queryOne(
+      `SELECT file_name, mime_type, content FROM patient_document
+       WHERE document_id = ? AND patient_id = ?`,
+      [intId(req.params.documentId, "Document"), patientId]
+    );
 
-    res.json({ documents: (await loadDocuments({ patientId }))[patientId] || [] });
+    if (!document || !document.content) throw notFound("Document not found.");
+
+    // The name is quoted so a comma or quote in it cannot break the header.
+    const safeName = document.file_name.replace(/["\\]/g, "");
+
+    res.setHeader("Content-Type", document.mime_type);
+    res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+    res.setHeader("Content-Length", document.content.length);
+    res.send(document.content);
+  })
+);
+
+documentsRouter.delete(
+  "/:id/documents/:documentId",
+  route(async (req, res) => {
+    const patientId = intId(req.params.id, "Patient");
+
+    assertOwnsDocuments(req, patientId);
+
+    const { affectedRows } = await query(
+      "DELETE FROM patient_document WHERE document_id = ? AND patient_id = ?",
+      [intId(req.params.documentId, "Document"), patientId]
+    );
+
+    if (!affectedRows) throw notFound("Document not found.");
+
+    res.json({ documents: await documentsFor(patientId) });
   })
 );

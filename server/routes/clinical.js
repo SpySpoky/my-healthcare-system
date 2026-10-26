@@ -31,7 +31,45 @@ const entryDate = (value) => {
   return date;
 };
 
-const emptyRecord = { medicalHistory: [], diagnoses: [], prescriptions: [], notes: [], vitals: null };
+const emptyRecord = { medicalHistory: [], diagnoses: [], prescriptions: [], notes: [], vitals: null, vitalsHistory: [] };
+
+// A vital sign reading. Blank fields are stored as NULL; the ranges
+// match the CHECK constraints in schema.sql.
+const BLOOD_PRESSURE = /^\d{2,3}\/\d{2,3}$/;
+
+const vitalNumber = (value, field, min, max, decimals = 0) => {
+  if (value === undefined || value === null || String(value).trim() === "") return null;
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number) || number < min || number > max) {
+    throw badRequest(`${field} must be a number between ${min} and ${max}.`);
+  }
+
+  return decimals ? Number(number.toFixed(decimals)) : Math.round(number);
+};
+
+const vitalsFields = (body) => {
+  const bloodPressure = text(body.bloodPressure, { field: "Blood pressure", max: 7 });
+
+  if (bloodPressure && !BLOOD_PRESSURE.test(bloodPressure)) {
+    throw badRequest("Blood pressure must look like 120/80.");
+  }
+
+  const fields = {
+    heart_rate: vitalNumber(body.heartRate, "Heart rate", 20, 250),
+    blood_pressure: bloodPressure || null,
+    temperature: vitalNumber(body.temperature, "Temperature", 30, 45, 1),
+    oxygen: vitalNumber(body.oxygen, "Oxygen saturation", 50, 100),
+    weight: vitalNumber(body.weight, "Weight", 1, 500, 1),
+  };
+
+  if (Object.values(fields).every((value) => value === null)) {
+    throw badRequest("Enter at least one reading.");
+  }
+
+  return fields;
+};
 
 // Each new entry is stored as its own medical_record row; the app
 // shows the rows as separate history / diagnosis / note / prescription lists.
@@ -65,13 +103,19 @@ recordsRouter.get(
   })
 );
 
+// Doctors write every section; medical staff (nurses) record vital signs,
+// which is how they monitor a patient's status.
 recordsRouter.post(
   "/:id/record/:section",
-  requireRole("doctor"),
+  requireRole("doctor", "medical_staff"),
   route(async (req, res) => {
     const patientId = intId(req.params.id, "Patient");
     const { section } = req.params;
     const body = req.body || {};
+
+    if (req.user.role === "medical_staff" && section !== "vitals") {
+      throw forbidden("Only doctors can write to this part of the record.");
+    }
 
     if (!(await queryOne("SELECT 1 AS ok FROM patient WHERE user_id = ?", [patientId]))) {
       throw notFound("Patient not found.");
@@ -80,6 +124,19 @@ recordsRouter.post(
     const date = entryDate(body.date);
 
     await withTransaction(async (tx) => {
+      if (section === "vitals") {
+        const fields = vitalsFields(body);
+        const columns = Object.keys(fields);
+
+        await tx.query(
+          `INSERT INTO vital_signs (patient_id, recorded_at, recorded_by, ${columns.join(", ")})
+           VALUES (?, ?, ?, ${columns.map(() => "?").join(", ")})`,
+          [patientId, date, req.user.id, ...columns.map((column) => fields[column])]
+        );
+
+        return;
+      }
+
       if (section === "prescriptions") {
         const { insertId } = await tx.query(
           "INSERT INTO medical_record (patient_id, doctor_id, record_date) VALUES (?, ?, ?)",

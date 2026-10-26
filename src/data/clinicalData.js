@@ -6,7 +6,7 @@
 import { STORAGE_KEYS, loadStored, saveStored } from "./storage";
 import { getPatientAppointments } from "./appointmentData";
 import { fromDemo } from "./demoRegistry";
-import { formatDate, getRelativeDate } from "../utils/date";
+import { formatDate } from "../utils/date";
 import { getPatientById } from "./patientsData";
 
 import { t } from "../i18n";
@@ -19,6 +19,7 @@ const emptyRecord = () => ({
   prescriptions: [],
   notes: [],
   vitals: null,
+  vitalsHistory: [],
 });
 
 export const loadClinicalRecord = (patientId) =>
@@ -54,16 +55,33 @@ export const addClinicalEntry = (patientId, section, entry) => {
   return updated;
 };
 
+// Records a new set of vital signs. The newest reading becomes the
+// patient's current status and is kept in the monitoring history.
+export const recordVitals = (patientId, reading) => {
+  const record = loadClinicalRecord(patientId);
+  const history = record.vitalsHistory || (record.vitals ? [record.vitals] : []);
+  const entry = {
+    id: Math.max(0, ...history.map((item) => Number(item.id) || 0)) + 1,
+    ...reading,
+  };
+
+  const updated = { ...record, vitals: entry, vitalsHistory: [entry, ...history] };
+
+  saveClinicalRecord(patientId, updated);
+
+  return updated;
+};
+
 /* =====================================================
    MONITORING (derived from vitals)
 ===================================================== */
 
-const buildMonitoring = (vitals, lastDoctor) => {
+const buildMonitoring = (vitals, history, lastDoctor) => {
   if (!vitals) {
     return { readings: [], history: [] };
   }
 
-  const systolic = Number(vitals.bloodPressure.split("/")[0]);
+  const systolic = Number(String(vitals.bloodPressure || "").split("/")[0]);
 
   const readings = [
     { id: 1, label: t("Heart Rate"), value: vitals.heartRate, unit: "bpm", icon: "❤️", iconClass: "bg-rose-100 text-rose-600", isNormal: Number(vitals.heartRate) >= 60 && Number(vitals.heartRate) <= 100 },
@@ -81,12 +99,19 @@ const buildMonitoring = (vitals, lastDoctor) => {
       : "border-amber-200 bg-amber-50 text-amber-700",
   }));
 
-  const history = [
-    { date: formatDate(vitals.recordedAt), time: "09:30", heartRate: `${vitals.heartRate} bpm`, bloodPressure: `${vitals.bloodPressure} mmHg`, temperature: `${vitals.temperature} °C`, oxygen: `${vitals.oxygen}%`, recordedBy: lastDoctor },
-    { date: formatDate(getRelativeDate(-8)), time: "10:15", heartRate: `${Number(vitals.heartRate) + 3} bpm`, bloodPressure: `${vitals.bloodPressure} mmHg`, temperature: `${vitals.temperature} °C`, oxygen: `${vitals.oxygen}%`, recordedBy: lastDoctor },
-  ];
+  // Every reading ever taken for this patient, newest first.
+  const blank = (value, unit) => (value === "" || value === undefined ? "—" : `${value}${unit}`);
+  const readingHistory = (history?.length ? history : [vitals]).map((entry) => ({
+    date: formatDate(entry.recordedAt),
+    time: entry.recordedTime || "—",
+    heartRate: blank(entry.heartRate, " bpm"),
+    bloodPressure: blank(entry.bloodPressure, " mmHg"),
+    temperature: blank(entry.temperature, " °C"),
+    oxygen: blank(entry.oxygen, "%"),
+    recordedBy: entry.recordedBy || lastDoctor,
+  }));
 
-  return { readings, history };
+  return { readings, history: readingHistory };
 };
 
 // Full record for the doctor's patient record page.
@@ -97,7 +122,7 @@ export const getPatientRecord = (patientId) => {
 
   const record = loadClinicalRecord(Number(patientId));
   const lastDoctor = record.medicalHistory[0]?.doctor || "Clinic staff";
-  const { readings, history } = buildMonitoring(record.vitals, lastDoctor);
+  const { readings, history } = buildMonitoring(record.vitals, record.vitalsHistory, lastDoctor);
 
   return {
     ...record,

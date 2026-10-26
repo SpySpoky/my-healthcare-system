@@ -97,10 +97,53 @@ const request = async (method, path, body) => {
   return data;
 };
 
+// Sends a form with files attached (multipart/form-data). The browser
+// sets the Content-Type itself, including the boundary.
+const sendForm = async (path, form) => {
+  const token = getToken();
+  let response;
+
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      body: form,
+    });
+  } catch {
+    throw new ApiError(0, translateServerMessage("Cannot reach the server. Check your connection and try again."));
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new ApiError(response.status, translateServerMessage(data?.error || "The request failed. Please try again."));
+  }
+
+  return data;
+};
+
+// Downloads a file the signed-in user is allowed to see. The token
+// goes in the header, never in the URL, so it cannot leak through
+// browser history or server logs.
+const download = async (path) => {
+  const token = getToken();
+  const response = await fetch(`${API_URL}${path}`, {
+    headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+  });
+
+  if (!response.ok) {
+    throw new ApiError(response.status, translateServerMessage("This document could not be downloaded."));
+  }
+
+  return response.blob();
+};
+
 export const api = {
   get: (path) => request("GET", path),
   post: (path, body = {}) => request("POST", path, body),
   put: (path, body = {}) => request("PUT", path, body),
   patch: (path, body = {}) => request("PATCH", path, body),
   delete: (path) => request("DELETE", path),
+  postForm: (path, form) => sendForm(path, form),
+  download,
 };

@@ -305,6 +305,13 @@ function Login() {
                       to="/register"
                       className="inline-flex w-full items-center justify-center rounded-2xl border-2 border-blue-600 px-6 py-3.5 text-sm font-bold text-blue-700 transition-all hover:-translate-y-0.5 hover:bg-blue-50"
                     >{t("Create an account")}</Link>
+
+                    {/* Doctors and medical staff apply for approval instead. */}
+                    <p className="mt-4 text-sm text-slate-500">{t("Doctor or medical staff?")} <Link
+                        to="/apply"
+                        className="font-bold text-teal-600 transition-colors hover:text-cyan-600"
+                      >{t("Apply for an account")}</Link>
+                    </p>
                   </div>
                 </>
               ) : (

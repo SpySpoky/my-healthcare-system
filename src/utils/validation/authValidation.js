@@ -6,6 +6,12 @@ const PHONE_PATTERN = /^\+?[0-9 ]{10,16}$/;
 
 export const PASSWORD_MIN_LENGTH = 8;
 
+// Supporting documents an applicant uploads (kept in step with the
+// limits the API enforces in server/routes/admin.js).
+export const DOCUMENT_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+export const MAX_DOCUMENTS = 5;
+
 export const PASSWORD_HINT = t("At least {PASSWORD_MIN_LENGTH} characters, including a letter and a number.", { PASSWORD_MIN_LENGTH });
 
 export const validateEmail = (value) => {
@@ -101,6 +107,87 @@ export const validateRegistration = (form) => {
 
   if (!form.gender) {
     errors.gender = t("Please select your gender.");
+  }
+
+  const passwordError = validateNewPassword(form.password);
+  if (passwordError) {
+    errors.password = passwordError;
+  }
+
+  const confirmError = validatePasswordConfirmation(
+    form.password,
+    form.confirmPassword
+  );
+  if (confirmError) {
+    errors.confirmPassword = confirmError;
+  }
+
+  if (!form.acceptTerms) {
+    errors.acceptTerms = t("You must accept the terms and conditions.");
+  }
+
+  return errors;
+};
+
+// Doctors and medical staff do not register directly: they send an
+// application that an administrator reviews (see the Approve
+// Application use case). At least one supporting document is required.
+export const validateStaffApplication = (form) => {
+  const errors = {};
+  const name = form.fullName.trim();
+
+  if (!name) {
+    errors.fullName = t("Full name is required.");
+  } else if (name.length < 3) {
+    errors.fullName = t("Full name must be at least 3 characters.");
+  }
+
+  const emailError = validateEmail(form.email);
+  if (emailError) {
+    errors.email = emailError;
+  }
+
+  if (!form.phone.trim()) {
+    errors.phone = t("Phone number is required.");
+  } else if (!PHONE_PATTERN.test(form.phone.trim())) {
+    errors.phone = t("Enter a valid phone number (10–16 digits).");
+  }
+
+  if (!form.role) {
+    errors.role = t("Select the position you are applying for.");
+  }
+
+  if (!form.department.trim()) {
+    errors.department = t("Department is required.");
+  }
+
+  if (!form.licenseNumber.trim()) {
+    errors.licenseNumber = t("License number is required.");
+  }
+
+  const experience = Number(form.experience);
+
+  if (form.experience === "" || Number.isNaN(experience) || experience < 0 || experience > 70) {
+    errors.experience = t("Enter your years of experience (0–70).");
+  }
+
+  if (!form.qualification.trim()) {
+    errors.qualification = t("Qualification is required.");
+  }
+
+  if (!form.documents.length) {
+    errors.documents = t("Attach at least one supporting document.");
+  } else {
+    const tooBig = form.documents.find((file) => file.size > MAX_DOCUMENT_BYTES);
+    const wrongType = form.documents.find((file) => !DOCUMENT_TYPES.includes(file.type));
+
+    if (wrongType) {
+      errors.documents = t("{name} is not a PDF, JPG or PNG file.", { name: wrongType.name });
+    } else if (tooBig) {
+      errors.documents = t("{name} is larger than 10 MB.", { name: tooBig.name });
+    } else if (form.documents.length > MAX_DOCUMENTS) {
+      errors.documents = t("Attach at most {count} documents.", { count: MAX_DOCUMENTS });
+    }
   }
 
   const passwordError = validateNewPassword(form.password);

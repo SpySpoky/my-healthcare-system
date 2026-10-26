@@ -16,10 +16,12 @@ const login = async (email, role) => {
 };
 const as = (name) => ({ Authorization: `Bearer ${tokens[name]}` });
 
-// A weekday the demo doctor works (Monday), at least a week ahead.
+// A weekday the demo doctor works (Monday), past the last demo
+// appointment (8 days out), so the slot the booking tests use is always
+// free whichever day the suite runs on.
 const nextMonday = () => {
   const date = new Date();
-  date.setUTCDate(date.getUTCDate() + 7);
+  date.setUTCDate(date.getUTCDate() + 15);
   while (date.getUTCDay() !== 1) date.setUTCDate(date.getUTCDate() + 1);
 
   return date.toISOString().slice(0, 10);
@@ -420,8 +422,16 @@ describe("applications", () => {
 
   it("accepts public applications and rejects duplicates", async () => {
     const body = { name: "Dr. Public Applicant", email: "public.applicant@example.com", role: "doctor", department: "Cardiology", licenseNumber: "MD-1" };
-    expect((await request(app).post("/api/applications").send(body)).status).toBe(201);
-    expect((await request(app).post("/api/applications").send(body)).status).toBe(409);
+    const send = () => {
+      const post = request(app).post("/api/applications");
+
+      Object.entries(body).forEach(([key, value]) => post.field(key, value));
+
+      return post.attach("documents", Buffer.from("%PDF-1.4 cv"), "CV.pdf");
+    };
+
+    expect((await send()).status).toBe(201);
+    expect((await send()).status).toBe(409);
   });
 
   it("is admin only", async () => {
@@ -449,12 +459,65 @@ describe("activity log", () => {
 });
 
 describe("documents", () => {
-  it("stores a patient's document list", async () => {
-    const docs = [{ id: 1, name: "passport.pdf", type: "Passport" }];
-    const res = await request(app).put("/api/patients/1/documents").set(as("patient")).send({ documents: docs });
+  const PASSPORT = Buffer.from("%PDF-1.4 passport scan");
 
-    expect(res.body.documents).toEqual(docs);
-    expect((await request(app).put("/api/patients/2/documents").set(as("patient")).send({ documents: [] })).status).toBe(403);
+  const upload = (who, { patient = 1, type = "Passport", name = "passport.pdf", content = PASSPORT } = {}) =>
+    request(app)
+      .post(`/api/patients/${patient}/documents`)
+      .set(as(who))
+      .field("type", type)
+      .attach("document", content, name);
+
+  let documentId;
+
+  it("stores a document the patient uploads", async () => {
+    const res = await upload("patient");
+
+    expect(res.status).toBe(201);
+    expect(res.body.documents[0]).toMatchObject({
+      name: "passport.pdf",
+      category: "Passport",
+      type: "application/pdf",
+      size: PASSPORT.length,
+      stored: true,
+    });
+
+    documentId = res.body.documents[0].id;
+
+    // It comes back with the rest of the patient's data.
+    const { documents } = (await request(app).get("/api/bootstrap").set(as("patient"))).body;
+    expect(documents["1"].some((item) => item.id === documentId)).toBe(true);
+  });
+
+  it("keeps one patient's documents away from another", async () => {
+    expect((await upload("patient", { patient: 2 })).status).toBe(403);
+    expect((await request(app).get(`/api/patients/1/documents/${documentId}`).set(as("doctor"))).status).toBe(403);
+    expect((await request(app).delete(`/api/patients/1/documents/${documentId}`).set(as("doctor"))).status).toBe(403);
+  });
+
+  it("gives the patient their file back", async () => {
+    const file = await request(app).get(`/api/patients/1/documents/${documentId}`).set(as("patient"));
+
+    expect(file.status).toBe(200);
+    expect(file.headers["content-disposition"]).toContain('filename="passport.pdf"');
+    expect(Buffer.from(file.body)).toEqual(PASSPORT);
+  });
+
+  it("validates the upload", async () => {
+    expect((await upload("patient", { name: "passport.pdf" })).status).toBe(409);
+    expect((await upload("patient", { type: "Nonsense", name: "other.pdf" })).status).toBe(400);
+    expect((await upload("patient", { name: "notes.txt", content: Buffer.from("text") })).status).toBe(400);
+
+    const tooBig = await upload("patient", { name: "huge.pdf", content: Buffer.alloc(11 * 1024 * 1024, 1) });
+    expect(tooBig.status).toBe(400);
+  });
+
+  it("deletes the document", async () => {
+    const removed = await request(app).delete(`/api/patients/1/documents/${documentId}`).set(as("patient"));
+
+    expect(removed.status).toBe(200);
+    expect(removed.body.documents.some((item) => item.id === documentId)).toBe(false);
+    expect((await request(app).get(`/api/patients/1/documents/${documentId}`).set(as("patient"))).status).toBe(404);
   });
 });
 
@@ -539,6 +602,225 @@ describe("messages", () => {
 
     expect(patientBox.some((m) => m.id === sentId)).toBe(false);
     expect(doctorBox.some((m) => m.id === sentId)).toBe(true);
+  });
+});
+
+describe("staff applications", () => {
+  const applicant = {
+    name: "Dr. Leyla Demir",
+    email: "leyla.demir@example.com",
+    phone: "+90 555 410 2200",
+    role: "doctor",
+    department: "Cardiology",
+    licenseNumber: "MD-TR-903311",
+    experience: 9,
+    qualification: "MD, Cardiology — Ege University",
+    password: PASSWORD,
+  };
+
+  const LICENCE = Buffer.from("%PDF-1.4 licence");
+  const CV = Buffer.from("%PDF-1.4 curriculum vitae");
+
+  // The form is multipart, so every field is attached one by one.
+  const apply = (overrides = {}, files = [["Medical license.pdf", LICENCE], ["CV.pdf", CV]]) => {
+    const post = request(app).post("/api/applications");
+
+    Object.entries({ ...applicant, ...overrides }).forEach(([key, value]) => post.field(key, String(value)));
+    files.forEach(([name, content]) => post.attach("documents", content, name));
+
+    return post;
+  };
+
+  let applicationId;
+
+  it("accepts an application with its documents and shows it to the admin only", async () => {
+    const sent = await apply();
+    expect(sent.status).toBe(201);
+
+    const again = await apply();
+    expect(again.status).toBe(409);
+
+    expect((await request(app).get("/api/applications")).status).toBe(401);
+    expect((await request(app).get("/api/applications").set(as("patient"))).status).toBe(403);
+
+    const { applications } = (await request(app).get("/api/applications").set(as("admin"))).body;
+    const pending = applications.find((item) => item.email === applicant.email);
+
+    expect(pending).toMatchObject({ name: applicant.name, role: "doctor", status: "Pending" });
+    expect(pending.documents).toEqual([
+      { id: 1, name: "Medical license.pdf", type: "application/pdf", size: LICENCE.length, stored: true },
+      { id: 2, name: "CV.pdf", type: "application/pdf", size: CV.length, stored: true },
+    ]);
+    applicationId = pending.id;
+  });
+
+  it("gives the administrator the uploaded file, and nobody else", async () => {
+    const path = `/api/applications/${applicationId}/documents/1`;
+
+    expect((await request(app).get(path)).status).toBe(401);
+    expect((await request(app).get(path).set(as("doctor"))).status).toBe(403);
+
+    const file = await request(app).get(path).set(as("admin"));
+
+    expect(file.status).toBe(200);
+    expect(file.headers["content-type"]).toContain("application/pdf");
+    expect(file.headers["content-disposition"]).toContain('filename="Medical license.pdf"');
+    expect(Buffer.from(file.body)).toEqual(LICENCE);
+
+    // A document the demo data only recorded by name has no file.
+    const nameOnly = await request(app).get("/api/applications/APP-1001/documents/1").set(as("admin"));
+    expect(nameOnly.status).toBe(404);
+  });
+
+  it("refuses an application with no documents, the wrong type or an oversized file", async () => {
+    const none = await apply({ email: "nodocs@example.com" }, []);
+    expect(none.status).toBe(400);
+
+    const wrongType = await apply({ email: "wrongtype@example.com" }, [
+      ["notes.txt", Buffer.from("plain text")],
+    ]);
+    expect(wrongType.status).toBe(400);
+
+    const tooBig = await apply({ email: "toobig@example.com" }, [
+      ["huge.pdf", Buffer.alloc(11 * 1024 * 1024, 1)],
+    ]);
+    expect(tooBig.status).toBe(400);
+  });
+
+  it("rejects an application for an email that already has an account", async () => {
+    const taken = await apply({ email: "doctor@test.com" });
+
+    expect(taken.status).toBe(409);
+  });
+
+  it("creates the account on approval, with the password from the application", async () => {
+    const approved = await request(app)
+      .patch(`/api/applications/${applicationId}`)
+      .set(as("admin"))
+      .send({ status: "Approved", reviewNote: "Credentials verified." });
+
+    expect(approved.status).toBe(200);
+    expect(approved.body.application.status).toBe("Approved");
+
+    const { user } = await login(applicant.email, "doctor");
+    expect(user).toMatchObject({ role: "doctor", email: applicant.email });
+  });
+});
+
+describe("user administration", () => {
+  let createdId;
+
+  it("lets an administrator create an account that can then sign in", async () => {
+    const nurse = {
+      name: "Nurse Aylin Kaya",
+      email: "aylin.kaya@example.com",
+      phone: "+90 555 410 3300",
+      role: "medical_staff",
+      department: "Emergency",
+      password: PASSWORD,
+    };
+
+    expect((await request(app).post("/api/users").set(as("doctor")).send(nurse)).status).toBe(403);
+
+    const created = await request(app).post("/api/users").set(as("admin")).send(nurse);
+
+    expect(created.status).toBe(201);
+    expect(created.body.user).toMatchObject({ name: nurse.name, role: "medical_staff", status: "Active" });
+    createdId = created.body.user.id;
+
+    const { user } = await login(nurse.email, "medical_staff");
+    expect(user.email).toBe(nurse.email);
+  });
+
+  it("validates new accounts and refuses a duplicate email", async () => {
+    const weak = await request(app)
+      .post("/api/users")
+      .set(as("admin"))
+      .send({ name: "Short Pass", email: "short@example.com", phone: "+90 555 410 4400", role: "patient", password: "abc" });
+
+    expect(weak.status).toBe(400);
+
+    const duplicate = await request(app)
+      .post("/api/users")
+      .set(as("admin"))
+      .send({ name: "Copy Cat", email: "patient@test.com", phone: "+90 555 410 4401", role: "patient", password: PASSWORD });
+
+    expect(duplicate.status).toBe(409);
+
+    const noDepartment = await request(app)
+      .post("/api/users")
+      .set(as("admin"))
+      .send({ name: "No Department", email: "nodept@example.com", phone: "+90 555 410 4402", role: "doctor", password: PASSWORD });
+
+    expect(noDepartment.status).toBe(400);
+  });
+
+  it("deletes an account, but keeps one with clinical history", async () => {
+    expect((await request(app).delete(`/api/users/${createdId}`).set(as("patient"))).status).toBe(403);
+
+    // The demo doctor has appointments and medical records, which the
+    // schema keeps (ON DELETE RESTRICT), so the account cannot go.
+    const doctor = (await request(app).get("/api/auth/me").set(as("doctor"))).body.user;
+    const busy = await request(app).delete(`/api/users/${doctor.id}`).set(as("admin"));
+
+    expect(busy.status).toBe(409);
+
+    const removed = await request(app).delete(`/api/users/${createdId}`).set(as("admin"));
+    expect(removed.status).toBe(204);
+
+    const { users } = (await request(app).get("/api/users").set(as("admin"))).body;
+    expect(users.some((user) => user.id === createdId)).toBe(false);
+  });
+
+  it("stops an administrator from deleting their own account", async () => {
+    const me = (await request(app).get("/api/auth/me").set(as("admin"))).body.user;
+    const res = await request(app).delete(`/api/users/${me.id}`).set(as("admin"));
+
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("vital signs", () => {
+  const reading = { heartRate: 72, bloodPressure: "118/76", temperature: 36.6, oxygen: 98, weight: 70.5 };
+
+  it("lets medical staff record a reading, which becomes the patient's status", async () => {
+    const saved = await request(app).post("/api/patients/1/record/vitals").set(as("staff")).send(reading);
+
+    expect(saved.status).toBe(201);
+    expect(saved.body.record.vitals).toMatchObject({
+      heartRate: "72",
+      bloodPressure: "118/76",
+      temperature: "36.6",
+      oxygen: "98",
+      weight: "70.5",
+    });
+    expect(saved.body.record.vitalsHistory[0]).toMatchObject({ bloodPressure: "118/76" });
+  });
+
+  it("validates the readings", async () => {
+    const empty = await request(app).post("/api/patients/1/record/vitals").set(as("staff")).send({});
+    expect(empty.status).toBe(400);
+
+    const silly = await request(app).post("/api/patients/1/record/vitals").set(as("staff")).send({ heartRate: 900 });
+    expect(silly.status).toBe(400);
+
+    const badPressure = await request(app)
+      .post("/api/patients/1/record/vitals")
+      .set(as("staff"))
+      .send({ bloodPressure: "high" });
+    expect(badPressure.status).toBe(400);
+  });
+
+  it("keeps the rest of the record for doctors, and patients out of it", async () => {
+    const diagnosis = await request(app)
+      .post("/api/patients/1/record/diagnoses")
+      .set(as("staff"))
+      .send({ diagnosis: "Not allowed", notes: "Nurses cannot diagnose." });
+
+    expect(diagnosis.status).toBe(403);
+
+    expect((await request(app).post("/api/patients/1/record/vitals").set(as("patient")).send(reading)).status).toBe(403);
+    expect((await request(app).post("/api/patients/1/record/vitals").set(as("admin")).send(reading)).status).toBe(403);
   });
 });
 

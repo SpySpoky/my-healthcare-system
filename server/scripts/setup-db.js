@@ -248,11 +248,11 @@ try {
   }
 
   for (const a of data.applications) {
-    await run(
+    const { insertId } = await run(
       `INSERT INTO staff_application
-         (full_name, email, phone, role, dept_id, license_number, experience_years, qualification, documents,
+         (full_name, email, phone, role, dept_id, license_number, experience_years, qualification,
           submitted_at, status, reviewed_at, reviewed_by, review_note)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         a.name,
         a.email,
@@ -262,7 +262,6 @@ try {
         a.licenseNumber,
         a.experience,
         a.qualification,
-        JSON.stringify(a.documents),
         dateOf(a.submittedDay),
         a.status,
         dateOf(a.reviewedDay),
@@ -270,6 +269,17 @@ try {
         a.reviewNote,
       ]
     );
+
+    // The demo applications record their documents by name only; the
+    // file itself arrives when a real applicant uploads one.
+    for (const [index, document] of a.documents.entries()) {
+      await run(
+        `INSERT INTO application_document
+           (application_id, document_no, file_name, mime_type, byte_size)
+         VALUES (?, ?, ?, ?, ?)`,
+        [insertId, index + 1, document.name, document.type, document.size]
+      );
+    }
   }
 
   for (const entry of data.activity) {

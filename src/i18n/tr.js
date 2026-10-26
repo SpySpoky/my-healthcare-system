@@ -10,7 +10,8 @@ import part5 from "./tr/part5.js";
 import part6 from "./tr/part6.js";
 import part7 from "./tr/part7.js";
 import part8 from "./tr/part8.js";
+import part9 from "./tr/part9.js";
 
-const tr = { ...part1, ...part2, ...part3, ...part4, ...part5, ...part6, ...part7, ...part8 };
+const tr = { ...part1, ...part2, ...part3, ...part4, ...part5, ...part6, ...part7, ...part8, ...part9 };
 
 export default tr;

@@ -34,6 +34,9 @@ const PATTERNS = [
     m[1] === "Approved"
       ? t("Approved application {id}", { id: m[2] + (m[3] ? ` (${m[3]})` : "") })
       : t("Rejected application {id}", { id: m[2] + (m[3] ? ` (${m[3]})` : "") })],
+  [/^Recorded vital signs for (.+)$/, (m) => t("Recorded vital signs for {name}", { name: m[1] })],
+  [/^Created user (U\d+) \((.+)\)$/, (m) => t("Created user {id} ({name})", { id: m[1], name: m[2] })],
+  [/^Deleted user (U\d+) \((.+)\)$/, (m) => t("Deleted user {id} ({name})", { id: m[1], name: m[2] })],
   [/^Updated user (U\d+) \((.+)\)$/, (m) => t("Updated user {id} ({name})", { id: m[1], name: m[2] })],
   [/^Changed status of (U\d+) \((.+)\) to (.+)$/, (m) => t("Changed status of {id} ({name}) to {status}", { id: m[1], name: m[2], status: lower(t(m[3])) })],
   [/^Exported report \((.+)\)$/, (m) => t("Exported report ({range})", { range: m[1] })],

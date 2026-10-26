@@ -53,6 +53,7 @@ const AdminActivity = lazy(() => import("../pages/admin/Activity"));
 
 const Login = lazy(() => import("../pages/auth/Login"));
 const Register = lazy(() => import("../pages/auth/Register"));
+const StaffApplication = lazy(() => import("../pages/auth/StaffApplication"));
 const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("../pages/auth/ResetPassword"));
 
@@ -114,6 +115,7 @@ const publicRoutes = [
   { path: "/login", title: t("Sign In"), element: <Login /> },
   { path: "/login/:role", title: t("Sign In"), element: <Login /> },
   { path: "/register", title: t("Create Account"), element: <Register /> },
+  { path: "/apply", title: t("Staff Application"), element: <StaffApplication /> },
   { path: "/forgot-password", title: t("Forgot Password"), element: <ForgotPassword /> },
   { path: "/reset-password", title: t("Reset Password"), element: <ResetPassword /> },
   { path: "/unauthorized", title: t("Access Denied"), element: <Unauthorized /> },

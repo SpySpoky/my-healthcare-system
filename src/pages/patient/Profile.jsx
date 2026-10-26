@@ -13,8 +13,25 @@ import {
   loadPatientDocuments,
   savePatientDocuments,
 } from "../../data/documentsData";
+import { USE_API } from "../../api/config";
+import { api } from "../../api/client";
 
 import { getLocale, t } from "../../i18n";
+
+// Documents keep their real size and upload time, so both are
+// formatted for display (and re-formatted when the language changes).
+const fileSize = (bytes) => {
+  const mb = Number(bytes) / (1024 * 1024);
+
+  return mb >= 0.1 ? `${mb.toFixed(2)} MB` : `${Math.max(1, Math.round(Number(bytes) / 1024))} KB`;
+};
+
+const uploadedOn = (value) =>
+  new Date(value).toLocaleDateString(getLocale(), {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 const EMPTY_PROFILE = {
   firstName: "",
   lastName: "",
@@ -70,6 +87,8 @@ function Profile() {
   useEffect(() => {
     savePatientDocuments(patientId, documents);
   }, [patientId, documents]);
+
+  const [isUploading, setIsUploading] = useState(false);
 
   const [documentType, setDocumentType] =
     useState("Passport");
@@ -361,7 +380,7 @@ function Profile() {
     const duplicateDocument =
       documents.some(
         (document) =>
-          document.fileName.toLowerCase() ===
+          document.name.toLowerCase() ===
           selectedFile.name.toLowerCase()
       );
 
@@ -372,52 +391,90 @@ function Profile() {
       return;
     }
 
-    const newDocument = {
-      id: Date.now(),
-      type: documentType,
-      name: selectedFile.name,
-      fileName: selectedFile.name,
-      uploadedAt:
-        new Date().toLocaleDateString(
-          getLocale(),
-          {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }
-        ),
-      size: `${(
-        selectedFile.size /
-        (1024 * 1024)
-      ).toFixed(2)} MB`,
+    const clearPicker = () => {
+      setSelectedFile(null);
+
+      const fileInput = window.document.getElementById("documentFile");
+
+      if (fileInput) {
+        fileInput.value = "";
+      }
     };
 
+    // With the backend the file is uploaded and kept in the database;
+    // without it only the description can be remembered.
+    if (USE_API) {
+      setIsUploading(true);
+
+      const payload = new FormData();
+
+      payload.append("type", documentType);
+      payload.append("document", selectedFile);
+
+      api
+        .postForm(`/patients/${patientId}/documents`, payload)
+        .then(({ documents: saved }) => {
+          setDocuments(saved);
+          clearPicker();
+        })
+        .catch((error) => setDocumentError(error.message))
+        .finally(() => setIsUploading(false));
+
+      return;
+    }
+
     setDocuments((current) => [
-      newDocument,
+      {
+        id: Date.now(),
+        category: documentType,
+        name: selectedFile.name,
+        type: selectedFile.type,
+        size: selectedFile.size,
+        uploadedAt: new Date().toISOString(),
+        stored: false,
+      },
       ...current,
     ]);
 
-    setSelectedFile(null);
-
-    const fileInput =
-      document.getElementById(
-        "documentFile"
-      );
-
-    if (fileInput) {
-      fileInput.value = "";
-    }
+    clearPicker();
   };
 
-  const handleDocumentDelete = (
-    documentId
-  ) => {
+  const handleDocumentDelete = (documentId) => {
+    setDocumentError("");
+
+    if (USE_API) {
+      api
+        .delete(`/patients/${patientId}/documents/${documentId}`)
+        .then(({ documents: saved }) => setDocuments(saved))
+        .catch((error) => setDocumentError(error.message));
+
+      return;
+    }
+
     setDocuments((current) =>
-      current.filter(
-        (document) =>
-          document.id !== documentId
-      )
+      current.filter((document) => document.id !== documentId)
     );
+  };
+
+  // The file is fetched with the patient's own token and handed to the
+  // browser as a download; it is never exposed through a plain URL.
+  const handleDocumentDownload = async (item) => {
+    setDocumentError("");
+
+    try {
+      const blob = await api.download(`/patients/${patientId}/documents/${item.id}`);
+      const url = URL.createObjectURL(blob);
+      const link = window.document.createElement("a");
+
+      link.href = url;
+      link.download = item.name;
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setDocumentError(error.message);
+    }
   };
 
   return (
@@ -1031,7 +1088,8 @@ function Profile() {
                     focus:ring-cyan-500/20
                   "
                   onClick={handleDocumentUpload}
-                >{t("Upload Document")}</button>
+                  disabled={isUploading}
+                >{isUploading ? t("Uploading...") : t("Upload Document")}</button>
 
               </div>
 
@@ -1092,12 +1150,47 @@ function Profile() {
                       </strong>
 
                       <span className="mt-1 block text-xs font-semibold text-cyan-700">
-                        {t(document.type)}
+                        {t(document.category)}
                       </span>
 
-                      <small className="mt-1 block text-xs text-slate-500">{t("Uploaded: {uploadedAt} • {size}", { uploadedAt: document.uploadedAt, size: document.size })}</small>
+                      <small className="mt-1 block text-xs text-slate-500">{t("Uploaded: {uploadedAt} • {size}", { uploadedAt: uploadedOn(document.uploadedAt), size: fileSize(document.size) })}</small>
 
                     </div>
+
+
+                    {/* Download */}
+
+                    {document.stored && (
+                      <button
+                        type="button"
+                        className="
+                          inline-flex
+                          min-h-10
+                          items-center
+                          justify-center
+                          rounded-xl
+                          border
+                          border-cyan-200
+                          bg-cyan-50
+                          px-4
+                          py-2
+                          text-sm
+                          font-bold
+                          text-cyan-700
+                          transition-all
+                          duration-200
+                          hover:-translate-y-0.5
+                          hover:border-cyan-300
+                          hover:bg-cyan-100
+                          hover:shadow-sm
+                          focus:outline-none
+                          focus:ring-4
+                          focus:ring-cyan-500/10
+                          sm:shrink-0
+                        "
+                        onClick={() => handleDocumentDownload(document)}
+                      >{t("Download")}</button>
+                    )}
 
 
                     {/* Delete */}

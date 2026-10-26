@@ -1,9 +1,11 @@
 // Patients (profile) and users (administration).
 
+import bcrypt from "bcryptjs";
 import { Router } from "express";
 import { requireAuth, requireRole } from "../auth.js";
+import { logActivity } from "../activity.js";
 import { loadPatients, loadUsers } from "../data.js";
-import { queryOne, withTransaction } from "../db.js";
+import { query, queryOne, withTransaction } from "../db.js";
 import {
   EMAIL_PATTERN,
   badRequest,
@@ -15,8 +17,10 @@ import {
   oneOf,
   optionalDate,
   parseRef,
+  passwordProblem,
   route,
   text,
+  userRef,
 } from "../util.js";
 
 export const patientsRouter = Router();
@@ -131,6 +135,149 @@ usersRouter.get(
   "/",
   route(async (_req, res) => {
     res.json({ users: await loadUsers() });
+  })
+);
+
+// Builds the slug the front end uses for a doctor ("sarah-johnson").
+const slugify = (name) =>
+  name
+    .toLowerCase()
+    .replace(/^dr\.?\s+/, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+// Creates the rows of the specialization the role belongs to.
+const createSubtype = async (tx, { role, userId, name, deptId, licenseNumber, specialization }) => {
+  if (role === "patient") {
+    await tx.query("INSERT INTO patient (user_id) VALUES (?)", [userId]);
+    return;
+  }
+
+  if (role === "admin") {
+    await tx.query("INSERT INTO admin (user_id) VALUES (?)", [userId]);
+    return;
+  }
+
+  const isDoctor = role === "doctor";
+  const license = licenseNumber || `${isDoctor ? "MD" : "RN"}-NEW-${userId}`;
+
+  await tx.query("INSERT INTO staff (user_id, staff_type, dept_id) VALUES (?, ?, ?)", [
+    userId,
+    isDoctor ? "doctor" : "nurse",
+    deptId,
+  ]);
+
+  if (isDoctor) {
+    let slug = slugify(name) || `doctor-${userId}`;
+
+    if ((await tx.query("SELECT 1 FROM doctor WHERE slug = ?", [slug])).length) slug = `${slug}-${userId}`;
+
+    await tx.query("INSERT INTO doctor (user_id, slug, specialization, license_number) VALUES (?, ?, ?, ?)", [
+      userId,
+      slug,
+      specialization || "Specialist",
+      license,
+    ]);
+  } else {
+    await tx.query("INSERT INTO nurse (user_id, license_number) VALUES (?, ?)", [userId, license]);
+  }
+};
+
+usersRouter.post(
+  "/",
+  route(async (req, res) => {
+    const body = req.body || {};
+    const name = text(body.name, { field: "Name", required: true, max: 100 });
+    const email = text(body.email, { field: "Email", required: true }).toLowerCase();
+    const phone = text(body.phone, { field: "Phone", max: 30 });
+    const role = oneOf(body.role, ["patient", "doctor", "medical_staff", "admin"], "Role");
+    const problem = passwordProblem(body.password);
+
+    checkContact({ name, email, phone });
+
+    if (problem) throw badRequest(problem);
+
+    if (["doctor", "medical_staff"].includes(role) && !dash(body.department)) {
+      throw badRequest("Department is required for medical staff.");
+    }
+
+    const hash = await bcrypt.hash(body.password, 10);
+
+    const userId = await withTransaction(async (tx) => {
+      if ((await tx.query("SELECT 1 FROM users WHERE email = ?", [email])).length) {
+        throw conflict("Another account already uses this email.");
+      }
+
+      const deptId = await departmentId(tx, body.department);
+      const { insertId } = await tx.query(
+        "INSERT INTO users (full_name, email, password, phone, user_type) VALUES (?, ?, ?, ?, ?)",
+        [name, email, hash, phone, ["doctor", "medical_staff"].includes(role) ? "staff" : role]
+      );
+
+      await createSubtype(tx, {
+        role,
+        userId: insertId,
+        name,
+        deptId,
+        licenseNumber: text(body.licenseNumber, { field: "License number", max: 50 }),
+        specialization: text(body.specialization, { field: "Specialization", max: 100 }),
+      });
+
+      return insertId;
+    });
+
+    await logActivity({
+      userId: req.user.id,
+      name: req.user.name,
+      role: "admin",
+      action: `Created user ${userRef(userId)} (${name})`,
+      module: "Users",
+      ip: req.ip,
+    });
+
+    const user = (await loadUsers()).find((item) => item.id === userRef(userId));
+
+    res.status(201).json({ user });
+  })
+);
+
+usersRouter.delete(
+  "/:id",
+  route(async (req, res) => {
+    const id = parseRef(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) throw badRequest("Id is invalid.");
+    if (id === req.user.id) throw badRequest("You cannot delete your own account.");
+
+    const account = await queryOne("SELECT user_id, full_name FROM users WHERE user_id = ?", [id]);
+
+    if (!account) throw notFound("User not found.");
+
+    // Appointments, medical records and lab tests keep their doctor
+    // (ON DELETE RESTRICT), so a doctor with clinical history stays.
+    try {
+      await query("DELETE FROM users WHERE user_id = ?", [id]);
+    } catch (error) {
+      if (error?.code === "ER_ROW_IS_REFERENCED_2" || error?.errno === 1451) {
+        throw conflict(
+          "This account has appointments or medical records and cannot be deleted. Deactivate it instead."
+        );
+      }
+
+      throw error;
+    }
+
+    await logActivity({
+      userId: req.user.id,
+      name: req.user.name,
+      role: "admin",
+      action: `Deleted user ${userRef(id)} (${account.full_name})`,
+      module: "Users",
+      status: "Warning",
+      ip: req.ip,
+    });
+
+    res.status(204).end();
   })
 );
 

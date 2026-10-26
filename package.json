@@ -36,6 +36,7 @@
     "google-auth-library": "^11.3.1",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.5.0",
     "mysql2": "^3.24.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

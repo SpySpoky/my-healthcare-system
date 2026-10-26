@@ -337,14 +337,25 @@ const createUsers = () => {
   }));
 };
 
+// Documents on the demo applications are recorded by name only: no
+// file was ever uploaded for them, so they cannot be downloaded.
+const docs = (...names) =>
+  names.map((name, index) => ({
+    id: index + 1,
+    name,
+    type: "application/pdf",
+    size: 180_000 + index * 40_000,
+    stored: false,
+  }));
+
 const createApplications = () => [
-  { id: "APP-1001", name: "Dr. Hannah Lee", email: "hannah.lee@example.com", phone: "+90 555 310 1001", role: "doctor", department: "Pediatrics", licenseNumber: "MD-TR-448120", experience: 8, qualification: "MD, Pediatrics Residency — Ankara University", submittedAt: daysAgo(1), documents: ["Medical license.pdf", "CV.pdf", "ID card.pdf"], status: "Pending" },
-  { id: "APP-1002", name: "Dr. Omar Haddad", email: "omar.haddad@example.com", phone: "+90 555 310 1002", role: "doctor", department: "Neurology", licenseNumber: "MD-TR-551903", experience: 12, qualification: "MD, PhD Neurology — Hacettepe University", submittedAt: daysAgo(2), documents: ["Medical license.pdf", "CV.pdf"], status: "Pending" },
-  { id: "APP-1003", name: "Grace Okafor", email: "grace.okafor@example.com", phone: "+90 555 310 1003", role: "medical_staff", department: "Emergency", licenseNumber: "RN-TR-220781", experience: 5, qualification: "BSc Nursing — Istanbul University", submittedAt: daysAgo(3), documents: ["Nursing license.pdf", "CV.pdf", "References.pdf"], status: "Pending" },
-  { id: "APP-1004", name: "Dr. Lucas Meyer", email: "lucas.meyer@example.com", phone: "+90 555 310 1004", role: "doctor", department: "Dermatology", licenseNumber: "MD-TR-390456", experience: 3, qualification: "MD — Ege University", submittedAt: daysAgo(5), documents: ["CV.pdf"], status: "Pending" },
-  { id: "APP-1005", name: "Selin Arslan", email: "selin.arslan@example.com", phone: "+90 555 310 1005", role: "medical_staff", department: "Radiology", licenseNumber: "RT-TR-118230", experience: 6, qualification: "Radiologic Technology Diploma", submittedAt: daysAgo(8), documents: ["Certification.pdf", "CV.pdf"], status: "Approved", reviewedAt: daysAgo(6), reviewedBy: "Elif Demir", reviewNote: "All documents verified." },
-  { id: "APP-1006", name: "Dr. Victor Novak", email: "victor.novak@example.com", phone: "+90 555 310 1006", role: "doctor", department: "Orthopedics", licenseNumber: "MD-TR-207733", experience: 15, qualification: "MD, Orthopedic Surgery — Gazi University", submittedAt: daysAgo(12), documents: ["Medical license.pdf", "CV.pdf", "ID card.pdf"], status: "Approved", reviewedAt: daysAgo(10), reviewedBy: CURRENT_ADMIN, reviewNote: "License confirmed with the medical board." },
-  { id: "APP-1007", name: "Kevin Brooks", email: "kevin.brooks@example.com", phone: "+90 555 310 1007", role: "medical_staff", department: "General Medicine", licenseNumber: "—", experience: 1, qualification: "Nursing student (final year)", submittedAt: daysAgo(16), documents: ["CV.pdf"], status: "Rejected", reviewedAt: daysAgo(14), reviewedBy: CURRENT_ADMIN, reviewNote: "A valid nursing license is required. The applicant may reapply after licensing." },
+  { id: "APP-1001", name: "Dr. Hannah Lee", email: "hannah.lee@example.com", phone: "+90 555 310 1001", role: "doctor", department: "Pediatrics", licenseNumber: "MD-TR-448120", experience: 8, qualification: "MD, Pediatrics Residency — Ankara University", submittedAt: daysAgo(1), documents: docs("Medical license.pdf", "CV.pdf", "ID card.pdf"), status: "Pending" },
+  { id: "APP-1002", name: "Dr. Omar Haddad", email: "omar.haddad@example.com", phone: "+90 555 310 1002", role: "doctor", department: "Neurology", licenseNumber: "MD-TR-551903", experience: 12, qualification: "MD, PhD Neurology — Hacettepe University", submittedAt: daysAgo(2), documents: docs("Medical license.pdf", "CV.pdf"), status: "Pending" },
+  { id: "APP-1003", name: "Grace Okafor", email: "grace.okafor@example.com", phone: "+90 555 310 1003", role: "medical_staff", department: "Emergency", licenseNumber: "RN-TR-220781", experience: 5, qualification: "BSc Nursing — Istanbul University", submittedAt: daysAgo(3), documents: docs("Nursing license.pdf", "CV.pdf", "References.pdf"), status: "Pending" },
+  { id: "APP-1004", name: "Dr. Lucas Meyer", email: "lucas.meyer@example.com", phone: "+90 555 310 1004", role: "doctor", department: "Dermatology", licenseNumber: "MD-TR-390456", experience: 3, qualification: "MD — Ege University", submittedAt: daysAgo(5), documents: docs("CV.pdf"), status: "Pending" },
+  { id: "APP-1005", name: "Selin Arslan", email: "selin.arslan@example.com", phone: "+90 555 310 1005", role: "medical_staff", department: "Radiology", licenseNumber: "RT-TR-118230", experience: 6, qualification: "Radiologic Technology Diploma", submittedAt: daysAgo(8), documents: docs("Certification.pdf", "CV.pdf"), status: "Approved", reviewedAt: daysAgo(6), reviewedBy: "Elif Demir", reviewNote: "All documents verified." },
+  { id: "APP-1006", name: "Dr. Victor Novak", email: "victor.novak@example.com", phone: "+90 555 310 1006", role: "doctor", department: "Orthopedics", licenseNumber: "MD-TR-207733", experience: 15, qualification: "MD, Orthopedic Surgery — Gazi University", submittedAt: daysAgo(12), documents: docs("Medical license.pdf", "CV.pdf", "ID card.pdf"), status: "Approved", reviewedAt: daysAgo(10), reviewedBy: CURRENT_ADMIN, reviewNote: "License confirmed with the medical board." },
+  { id: "APP-1007", name: "Kevin Brooks", email: "kevin.brooks@example.com", phone: "+90 555 310 1007", role: "medical_staff", department: "General Medicine", licenseNumber: "—", experience: 1, qualification: "Nursing student (final year)", submittedAt: daysAgo(16), documents: docs("CV.pdf"), status: "Rejected", reviewedAt: daysAgo(14), reviewedBy: CURRENT_ADMIN, reviewNote: "A valid nursing license is required. The applicant may reapply after licensing." },
 ];
 
 const createFeedback = () => [

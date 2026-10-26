@@ -21,11 +21,17 @@ import {
   ADMIN_STORAGE_KEYS,
   USER_ROLES,
   USER_STATUSES,
+  formatTodayShort,
+  getNextUserId,
   getRoleLabel,
   loadUsers,
   logAdminActivity,
 } from "../../data/adminData";
+import { setNewUserPassword } from "../../api/persist";
+import { addPatient, removePatient } from "../../data/patientsData";
+import { validateNewPassword } from "../../utils/validation/authValidation";
 import { useStoredState } from "../../hooks/useStoredState";
+import { USE_API } from "../../api/config";
 import { ALL_DEPARTMENTS } from "../../data/doctorsData";
 import { getPatientByEmail, updatePatient } from "../../data/patientsData";
 
@@ -51,6 +57,15 @@ const PAGE_SIZE = 8;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?[0-9 ]{10,16}$/;
 
+const BLANK_USER = {
+  name: "",
+  email: "",
+  phone: "",
+  role: "patient",
+  department: "",
+  password: "",
+};
+
 
 
 function Users() {
@@ -72,6 +87,10 @@ function Users() {
   const [editForm, setEditForm] = useState({});
   const [editErrors, setEditErrors] = useState({});
   const [statusChange, setStatusChange] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [addForm, setAddForm] = useState(BLANK_USER);
+  const [addErrors, setAddErrors] = useState({});
+  const [deletingUser, setDeletingUser] = useState(null);
 
 
 
@@ -273,6 +292,133 @@ function Users() {
     setStatusChange(null);
   };
 
+  /* ---------- Add ---------- */
+
+  const openAdd = () => {
+    setAddForm(BLANK_USER);
+    setAddErrors({});
+    setIsAdding(true);
+  };
+
+  const handleAddChange = (event) => {
+    const { name, value } = event.target;
+
+    setAddForm((previous) => ({ ...previous, [name]: value }));
+
+    if (addErrors[name]) {
+      setAddErrors((previous) => ({ ...previous, [name]: "" }));
+    }
+  };
+
+  const validateAdd = () => {
+    const errors = {};
+    const email = addForm.email.trim().toLowerCase();
+
+    if (addForm.name.trim().length < 3) {
+      errors.name = t("Name must be at least 3 characters.");
+    }
+
+    if (!EMAIL_PATTERN.test(email)) {
+      errors.email = t("Enter a valid email address.");
+    } else if (users.some((user) => user.email.toLowerCase() === email)) {
+      errors.email = t("Another account already uses this email.");
+    }
+
+    if (!PHONE_PATTERN.test(addForm.phone.trim())) {
+      errors.phone = t("Enter a valid phone number (10–16 digits).");
+    }
+
+    if (!addForm.role) {
+      errors.role = t("Select a role.");
+    }
+
+    if (
+      ["doctor", "medical_staff"].includes(addForm.role) &&
+      !addForm.department.trim()
+    ) {
+      errors.department = t("Department is required for medical staff.");
+    }
+
+    const passwordError = validateNewPassword(addForm.password);
+
+    if (passwordError) {
+      errors.password = passwordError;
+    }
+
+    setAddErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleAddSubmit = (event) => {
+    event.preventDefault();
+
+    if (!validateAdd()) {
+      return;
+    }
+
+    const id = getNextUserId(users);
+    const account = {
+      id,
+      name: addForm.name.trim(),
+      email: addForm.email.trim(),
+      phone: addForm.phone.trim(),
+      role: addForm.role,
+      department: addForm.department.trim() || "—",
+      status: "Active",
+      joined: formatTodayShort(),
+      lastLogin: "Never",
+    };
+
+    // The password travels with the request that creates the account,
+    // never into the stored user.
+    setNewUserPassword(id, addForm.password);
+    setUsers((previous) => [...previous, account]);
+
+    // With the backend the new patient record comes back from the server.
+    if (!USE_API && account.role === "patient") {
+      addPatient({
+        name: account.name,
+        email: account.email,
+        phone: account.phone,
+        dateOfBirth: "",
+      });
+    }
+
+    logAdminActivity(`Created user ${id} (${account.name})`, "Users");
+    showToast(t("{name} was added.", { name: account.name }));
+    setIsAdding(false);
+  };
+
+  /* ---------- Delete ---------- */
+
+  const requestDelete = (user) => {
+    if (isCurrentAdmin(user)) {
+      showToast(t("You cannot delete your own account."), "error");
+      return;
+    }
+
+    setDeletingUser(user);
+  };
+
+  const confirmDelete = () => {
+    const user = deletingUser;
+
+    setUsers((previous) => previous.filter((item) => item.id !== user.id));
+
+    if (!USE_API && user.role === "patient") {
+      const patient = getPatientByEmail(user.email);
+
+      if (patient) {
+        removePatient(patient.id);
+      }
+    }
+
+    logAdminActivity(`Deleted user ${user.id} (${user.name})`, "Users");
+    showToast(t("{name} was deleted.", { name: user.name }));
+    setDeletingUser(null);
+  };
+
   const roleOptions = [
     { value: "All", label: t("All roles") },
     ...USER_ROLES,
@@ -284,6 +430,13 @@ function Users() {
         eyebrow={t("Administration")}
         title={t("User Management")}
         description={t("Search all patient, doctor, medical staff and administrator accounts, update their details and control account access.")}
+        actions={
+          <button
+            type="button"
+            onClick={openAdd}
+            className="rounded-xl bg-white px-5 py-3 text-sm font-black text-blue-700 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:bg-blue-50"
+          >{t("+ Add User")}</button>
+        }
       />
 
       <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
@@ -439,6 +592,13 @@ function Users() {
                             className="rounded-lg px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-50"
                           >{t("Activate")}</button>
                         )}
+
+                        <button
+                          type="button"
+                          onClick={() => requestDelete(user)}
+                          disabled={isCurrentAdmin(user)}
+                          className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                        >{t("Delete")}</button>
                       </div>
                     </td>
                   </tr>
@@ -599,13 +759,6 @@ function Users() {
               error={editErrors.department}
             />
 
-            {/* Departments from the database; a new name creates one. */}
-            <datalist id="department-suggestions">
-              {ALL_DEPARTMENTS.map((department) => (
-                <option key={department} value={department} />
-              ))}
-            </datalist>
-
             <div className="mt-2 flex justify-end gap-3">
               <Button
                 variant="secondary"
@@ -617,6 +770,116 @@ function Users() {
           </form>
         )}
       </Modal>
+
+      {/* Departments from the database; a new name creates one. */}
+      <datalist id="department-suggestions">
+        {ALL_DEPARTMENTS.map((department) => (
+          <option key={department} value={department} />
+        ))}
+      </datalist>
+
+      {/* ADD MODAL */}
+
+      <Modal
+        title={t("Add User")}
+        isOpen={isAdding}
+        onClose={() => setIsAdding(false)}
+      >
+        <form onSubmit={handleAddSubmit} noValidate>
+          <Input
+            label={t("Full name")}
+            name="name"
+            value={addForm.name}
+            onChange={handleAddChange}
+            required
+            error={addErrors.name}
+          />
+
+          <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+            <div>
+              <Input
+                label={t("Email")}
+                name="email"
+                type="email"
+                value={addForm.email}
+                onChange={handleAddChange}
+                required
+                error={addErrors.email}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={t("Phone")}
+                name="phone"
+                type="tel"
+                value={addForm.phone}
+                onChange={handleAddChange}
+                required
+                error={addErrors.phone}
+              />
+            </div>
+
+            <div>
+              <Select
+                label={t("Role")}
+                name="role"
+                value={addForm.role}
+                onChange={handleAddChange}
+                options={USER_ROLES}
+                required
+                error={addErrors.role}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={t("Temporary password")}
+                name="password"
+                type="password"
+                value={addForm.password}
+                onChange={handleAddChange}
+                required
+                error={addErrors.password}
+              />
+            </div>
+          </div>
+
+          <Input
+            label={t("Department")}
+            name="department"
+            value={addForm.department}
+            onChange={handleAddChange}
+            placeholder={t("Choose or type a department")}
+            list="department-suggestions"
+            required={["doctor", "medical_staff"].includes(addForm.role)}
+            error={addErrors.department}
+          />
+
+          <p className="mt-1 text-xs text-slate-500">{t("Give the temporary password to the account holder. They can change it with Forgot Password.")}</p>
+
+          <div className="mt-4 flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsAdding(false)}
+            >{t("Cancel")}</Button>
+
+            <Button type="submit">{t("Create Account")}</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* DELETE CONFIRMATION */}
+
+      <ConfirmDialog
+        isOpen={Boolean(deletingUser)}
+        title={t("Delete account?")}
+        message={t("{name} will be removed permanently. Accounts with appointments or medical records cannot be deleted — deactivate them instead.", { name: deletingUser?.name })}
+        confirmText={t("Delete")}
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeletingUser(null)}
+      />
 
       {/* STATUS CONFIRMATION */}
 

@@ -50,6 +50,10 @@ export const updatePatient = (id, changes) => {
   return patients.find((patient) => patient.id === id);
 };
 
+// Removes a patient record (when an administrator deletes the account).
+export const removePatient = (id) =>
+  savePatients(loadPatients().filter((patient) => patient.id !== id));
+
 // Adds a patient (from registration) and returns it.
 export const addPatient = (details) => {
   const patients = loadPatients();

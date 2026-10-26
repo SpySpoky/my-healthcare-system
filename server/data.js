@@ -3,6 +3,7 @@
 
 import { query } from "./db.js";
 import { ROLE_SQL } from "./auth.js";
+import { toStoredDocument } from "./uploads.js";
 import {
   activityRef,
   applicationRef,
@@ -205,6 +206,7 @@ const emptyRecord = () => ({
   prescriptions: [],
   notes: [],
   vitals: null,
+  vitalsHistory: [],
 });
 
 // Newest first, like the app expects.
@@ -240,8 +242,10 @@ export const loadClinicalRecords = async ({ patientId } = {}) => {
 
   const vitals = await query(
     `SELECT v.vital_id, v.patient_id, v.recorded_at, v.heart_rate, v.blood_pressure,
-            v.temperature, v.oxygen, v.weight
-     FROM vital_signs v ${patientId ? "WHERE v.patient_id = ?" : ""}
+            v.temperature, v.oxygen, v.weight, ru.full_name AS recorded_by
+     FROM vital_signs v
+     LEFT JOIN users ru ON ru.user_id = v.recorded_by
+     ${patientId ? "WHERE v.patient_id = ?" : ""}
      ORDER BY v.recorded_at, v.vital_id`,
     params
   );
@@ -287,15 +291,22 @@ export const loadClinicalRecords = async ({ patientId } = {}) => {
   });
 
   vitals.forEach((row) => {
-    // The list is ordered oldest to newest, so the last row wins.
-    recordFor(row.patient_id).vitals = {
+    const reading = {
+      id: row.vital_id,
       heartRate: row.heart_rate === null ? "" : String(row.heart_rate),
       bloodPressure: row.blood_pressure || "",
       temperature: row.temperature === null ? "" : String(Number(row.temperature)),
       oxygen: row.oxygen === null ? "" : String(row.oxygen),
       weight: row.weight === null ? "" : String(Number(row.weight)),
       recordedAt: row.recorded_at,
+      recordedBy: row.recorded_by || "",
     };
+    const record = recordFor(row.patient_id);
+
+    // The list is ordered oldest to newest, so the last row wins and
+    // the history ends up newest first.
+    record.vitals = reading;
+    record.vitalsHistory.unshift(reading);
   });
 
   Object.values(result).forEach((record) => {
@@ -364,7 +375,7 @@ export const loadFeedbackItem = async (id) => {
 /* ---------- applications ---------- */
 
 const applicationSelect = `SELECT a.application_id, a.full_name, a.email, a.phone, a.role, dep.dept_name,
-       a.license_number, a.experience_years, a.qualification, a.documents, a.submitted_at,
+       a.license_number, a.experience_years, a.qualification, a.submitted_at,
        a.status, a.reviewed_at, a.review_note, ru.full_name AS reviewer
 FROM staff_application a
 LEFT JOIN department dep ON dep.dept_id = a.dept_id
@@ -381,7 +392,7 @@ const toApplication = (row) => ({
   experience: row.experience_years ?? 0,
   qualification: row.qualification || "",
   submittedAt: shortDate(row.submitted_at),
-  documents: typeof row.documents === "string" ? JSON.parse(row.documents) : row.documents || [],
+  documents: row.documents || [],
   status: row.status,
   ...(row.status !== "Pending" && {
     reviewedAt: shortDate(row.reviewed_at),
@@ -392,8 +403,23 @@ const toApplication = (row) => ({
 
 export const loadApplications = async () => {
   const rows = await query(`${applicationSelect} ORDER BY a.application_id DESC`);
+  const documents = await query(
+    `SELECT application_id, document_no, file_name, mime_type, byte_size,
+            content IS NOT NULL AS has_file
+     FROM application_document
+     ORDER BY application_id, document_no`
+  );
 
-  return rows.map(toApplication);
+  const byApplication = new Map();
+
+  documents.forEach((row) => {
+    if (!byApplication.has(row.application_id)) byApplication.set(row.application_id, []);
+    byApplication.get(row.application_id).push(toStoredDocument(row));
+  });
+
+  return rows.map((row) =>
+    toApplication({ ...row, documents: byApplication.get(row.application_id) || [] })
+  );
 };
 
 /* ---------- activity ---------- */
@@ -420,16 +446,25 @@ export const loadActivity = async ({ userId, limit = 500 } = {}) => {
 
 /* ---------- patient documents ---------- */
 
+// Newest first, the way the profile page lists them. The file itself
+// is never loaded here, only its description.
 export const loadDocuments = async ({ patientId } = {}) => {
   const rows = await query(
-    `SELECT patient_id, data FROM patient_document
-     ${patientId ? "WHERE patient_id = ?" : ""} ORDER BY document_id`,
+    `SELECT document_id, patient_id, doc_type, file_name, mime_type, byte_size,
+            created_at, content IS NOT NULL AS has_file
+     FROM patient_document
+     ${patientId ? "WHERE patient_id = ?" : ""}
+     ORDER BY created_at DESC, document_id DESC`,
     patientId ? [patientId] : []
   );
   const result = {};
 
   rows.forEach((row) => {
-    (result[row.patient_id] ||= []).push(typeof row.data === "string" ? JSON.parse(row.data) : row.data);
+    (result[row.patient_id] ||= []).push({
+      ...toStoredDocument(row),
+      category: row.doc_type,
+      uploadedAt: isoTimestamp(row.created_at),
+    });
   });
 
   return result;

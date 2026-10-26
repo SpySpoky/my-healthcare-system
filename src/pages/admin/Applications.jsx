@@ -26,8 +26,15 @@ import {
   saveStored,
 } from "../../data/adminData";
 import { useStoredState } from "../../hooks/useStoredState";
+import { api } from "../../api/client";
 
 import { t } from "../../i18n";
+
+const fileSize = (bytes) => {
+  const mb = Number(bytes) / (1024 * 1024);
+
+  return mb >= 0.1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(Number(bytes) / 1024))} KB`;
+};
 import { localDate } from "../../utils/date";
 const TABS = ["Pending", "Approved", "Rejected"];
 
@@ -36,6 +43,27 @@ const MIN_REJECTION_REASON = 10;
 
 function Applications() {
   const showToast = useToast();
+
+  // The file is fetched with the administrator's token and handed to
+  // the browser as a download; it is never exposed through a plain URL.
+  const downloadDocument = async (applicationId, document) => {
+    try {
+      const blob = await api.download(
+        `/applications/${applicationId}/documents/${document.id}`
+      );
+      const url = URL.createObjectURL(blob);
+      const link = window.document.createElement("a");
+
+      link.href = url;
+      link.download = document.name;
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  };
 
   const [applications, setApplications] = useStoredState(
     ADMIN_STORAGE_KEYS.applications,
@@ -408,11 +436,29 @@ function Applications() {
 
               <ul className="flex flex-wrap gap-2">
                 {selectedApplication.documents.map((document) => (
-                  <li
-                    key={document}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600"
-                  >
-                    📄 {t(document)}
+                  <li key={document.id}>
+                    {document.stored ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          downloadDocument(selectedApplication.id, document)
+                        }
+                        className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-100"
+                      >
+                        📄 {document.name}
+                        <span className="font-normal text-blue-500">
+                          {fileSize(document.size)}
+                        </span>
+                      </button>
+                    ) : (
+                      <span
+                        title={t("No file was uploaded with this application.")}
+                        className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600"
+                      >
+                        📄 {t(document.name)}
+                        <span className="font-normal text-slate-400">{t("name only")}</span>
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

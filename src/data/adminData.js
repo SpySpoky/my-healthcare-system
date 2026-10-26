@@ -101,6 +101,9 @@ export const loadUsers = () => loadStored(STORAGE_KEYS.users, () => fromDemo("us
 export const loadApplications = () =>
   loadStored(STORAGE_KEYS.applications, () => fromDemo("applications", () => []));
 
+export const getNextApplicationId = (applications) =>
+  `APP-${Math.max(1000, ...applications.map((item) => Number(item.id.slice(4)) || 0)) + 1}`;
+
 export const loadFeedback = () =>
   loadStored(STORAGE_KEYS.feedback, () => fromDemo("feedback", () => []));
 

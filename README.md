@@ -81,12 +81,13 @@ To add a language: add it to `LANGUAGES` in `src/i18n/index.js`, create its dict
 | Auth | `POST /auth/login`, `/auth/google`, `/auth/register`, `/auth/forgot-password`, `/auth/reset-password`, `GET /auth/me` |
 | Data | `GET /bootstrap` (role-scoped), `GET /health` |
 | Appointments | `POST /appointments`, `PATCH /appointments/:id` |
-| Patients | `PATCH /patients/:id`, `GET /patients/:id/record`, `POST /patients/:id/record/:section`, `PUT /patients/:id/documents` |
+| Patients | `PATCH /patients/:id`, `GET /patients/:id/record`, `POST /patients/:id/record/:section` (doctors; `vitals` also medical staff) |
+| Patient documents | `POST /patients/:id/documents` (`multipart/form-data`), `GET /patients/:id/documents/:documentId` (downloads it), `DELETE /patients/:id/documents/:documentId` |
 | Doctors | `PUT /doctors/:slug/availability` |
 | Feedback | `GET/POST /feedback`, `PATCH/DELETE /feedback/:id` |
-| Applications | `POST /applications` (public), `GET /applications`, `PATCH /applications/:id` (admin; approval creates the account) |
+| Applications | `POST /applications` (public, `multipart/form-data` with the documents), `GET /applications`, `GET /applications/:id/documents/:no` (admin; downloads one file), `PATCH /applications/:id` (admin; approval creates the account) |
 | Messages | `GET /messages`, `POST /messages`, `GET /messages/contacts`, `GET /messages/unread-count`, `PATCH /messages/:id/read`, `DELETE /messages/:id` (patients, doctors, medical staff) |
-| Users / activity | `GET/PATCH /users` (admin), `GET/POST /activity` |
+| Users / activity | `GET/POST/PATCH/DELETE /users` (admin), `GET/POST /activity` |
 
 Security notes: passwords are bcrypt hashes; sessions are signed JWTs checked against the database
 on every request (a suspended account is locked out at once); every route checks the caller's role
@@ -99,6 +100,14 @@ verified server side when `TURNSTILE_SECRET_KEY` / `GOOGLE_CLIENT_ID` are set.
 patient / staff / admin, staff into doctor / nurse / receptionist, appointments, medical records,
 prescriptions, lab tests, schedules) plus feedback, staff applications, activity log, vital signs,
 patient documents and password resets.
+
+Uploaded files live in the database rather than on disk, so every copy of the desktop app sees the
+same documents through the shared MySQL server. PDF, JPG or PNG, 10 MB each:
+
+- `application_document` — a weak entity of `staff_application` (like `prescription`), up to 5
+  files per application. Only an administrator can download them.
+- `patient_document` — the files a patient uploads on their profile, up to 50. Only that patient
+  and an administrator can download them.
 
 ## Desktop app (Windows)
 
@@ -117,6 +126,8 @@ address (`127.0.0.1`, a free port) and shows it in a window. There is no separat
 
 - There is no mail server: outside production the password-reset token is returned by the API and
   the reset page links to it directly.
-- Uploaded profile documents are stored as metadata only (no file storage yet).
-- The Electron desktop application from the project plan is not built yet.
+- Uploaded documents are kept in the database, so a very large collection makes it grow quickly.
 - Changing an account's type (e.g. patient to doctor) in User Management is rejected by the server.
+- An account with appointments or medical records cannot be deleted (the schema keeps them);
+  deactivate it instead. Deleting a patient removes their appointments and records with them.
+- Vital signs are stored with the date they were measured, not the time of day.

@@ -79,6 +79,21 @@ export const flushChanges = () => queue;
 // (e.g. approving an application creates a user and a doctor).
 export const refreshAfterQueue = () => enqueue(() => recover());
 
+// The password for a new account is needed by the request that creates
+// it, but must never be stored with the rest of the user. The Add User
+// form leaves it here and the request below takes it straight out again.
+const newPasswords = new Map();
+
+export const setNewUserPassword = (tempId, password) => newPasswords.set(String(tempId), password);
+
+const takeNewUserPassword = (tempId) => {
+  const password = newPasswords.get(String(tempId));
+
+  newPasswords.delete(String(tempId));
+
+  return password;
+};
+
 // Swaps a temporary id for the server's id, keeping later local edits.
 const adoptId = (key, tempId, id) => {
   idMap.set(`${key}:${tempId}`, id);
@@ -110,13 +125,36 @@ const handlers = {
   [KEYS.users]: (prev, next) => {
     if (getSessionRole() !== "admin") return;
 
-    diffList(prev, next).changed.forEach(({ item, changes }) => {
+    const { added, changed, removed } = diffList(prev, next);
+
+    added.forEach((item) =>
+      enqueue(async () => {
+        const password = takeNewUserPassword(item.id);
+        const { user } = await api.post("/users", {
+          ...pick(item, ["name", "email", "phone", "role", "department"]),
+          password,
+        });
+
+        adoptId(KEYS.users, item.id, user.id);
+        // A new doctor or patient also belongs in the other collections.
+        await recover();
+      })
+    );
+
+    changed.forEach(({ item, changes }) => {
       const body = pick(changes, ["name", "email", "phone", "role", "department", "status"]);
 
       if (Object.keys(body).length) {
-        enqueue(() => api.patch(`/users/${item.id}`, body));
+        enqueue(() => api.patch(`/users/${realId(KEYS.users, item.id)}`, body));
       }
     });
+
+    removed.forEach((item) =>
+      enqueue(async () => {
+        await api.delete(`/users/${realId(KEYS.users, item.id)}`);
+        await recover();
+      })
+    );
   },
 
   [KEYS.appointments]: (prev, next) => {
@@ -205,16 +243,32 @@ const handlers = {
     });
   },
 
-  [KEYS.documents]: (prev, next) => {
+  [KEYS.clinicalRecords]: (prev, next) => {
+    const role = getSessionRole();
+
+    if (!["doctor", "medical_staff"].includes(role)) return;
+
+    const saveRecord = (patientId, record) =>
+      cacheSet(KEYS.clinicalRecords, { ...cacheGet(KEYS.clinicalRecords), [patientId]: record });
+
+    // Nurses and other medical staff record vital signs; the rest of
+    // the record is written by doctors only.
     Object.keys(next || {}).forEach((patientId) => {
-      if (!sameJson(prev?.[patientId] || [], next[patientId])) {
-        enqueue(() => api.put(`/patients/${patientId}/documents`, { documents: next[patientId] }));
+      const reading = next[patientId].vitals;
+
+      if (reading && !sameJson(prev?.[patientId]?.vitals, reading)) {
+        enqueue(async () => {
+          const { record } = await api.post(`/patients/${patientId}/record/vitals`, {
+            ...pick(reading, ["heartRate", "bloodPressure", "temperature", "oxygen", "weight"]),
+            date: reading.recordedAt,
+          });
+
+          saveRecord(patientId, record);
+        });
       }
     });
-  },
 
-  [KEYS.clinicalRecords]: (prev, next) => {
-    if (getSessionRole() !== "doctor") return;
+    if (role !== "doctor") return;
 
     const sections = {
       diagnoses: ["date", "diagnosis", "notes", "status"],
@@ -231,7 +285,7 @@ const handlers = {
             enqueue(async () => {
               const { record } = await api.post(`/patients/${patientId}/record/${section}`, pick(entry, fields));
 
-              cacheSet(KEYS.clinicalRecords, { ...cacheGet(KEYS.clinicalRecords), [patientId]: record });
+              saveRecord(patientId, record);
             })
           );
       });
